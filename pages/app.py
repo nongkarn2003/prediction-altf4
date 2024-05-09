@@ -58,13 +58,6 @@ m = Prophet()
 m.fit(df_train)
 future = m.make_future_dataframe(periods=period)
 forecast = m.predict(future)
-import streamlit.components.v1 as components
 
-@st.cache_data
-def plot_forecast(m, forecast):
-    fig1 = plot_plotly(m, forecast)
-    fig2 = m.plot_components(forecast)
-    return fig1, fig2
-
-# Usage
-fig1, fig2 = plot_forecast(m, forecast)
+fig1 = model.plot(forecast) # Prophet's plot method creates a prediction graph
+st.write(fig1)
