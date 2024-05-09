@@ -64,17 +64,7 @@ st.subheader('Forecast data')
 st.write(forecast.tail())
 
 fig1 = plot_plotly(m, forecast)
-html_content = fig1.to_html(full_html=True)
-
-# บันทึก HTML content ไปยังไฟล์ชั่วคราว
-with open('temp.html', 'w') as f:
-    f.write(html_content)
-
-# กำหนด URL ของไฟล์ temp.html
-url = 'file://' + os.path.realpath('temp.html')
-
-# แสดงผล HTML content ด้วย iframe
-components.iframe(url, width=800, height=600)
+components.html(fig1.to_html(full_html=False), height=600, )
 
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
