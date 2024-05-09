@@ -6,6 +6,7 @@ from prophet.plot import plot_plotly
 from plotly import graph_objects as go
 import plotly.graph_objs as go
 import streamlit.components.v1 as components
+from prophet.plot import plot_plotly
 
 
 
@@ -60,17 +61,10 @@ forecast = m.predict(future)
 import streamlit.components.v1 as components
 
 @st.cache_data
-def plot_forecast():
+def plot_forecast(m, forecast):
     fig1 = plot_plotly(m, forecast)
     fig2 = m.plot_components(forecast)
     return fig1, fig2
 
-# Forecast data
-st.write('forecast data')
-fig1, _ = plot_forecast()
-components.html(fig1.to_html(full_html=False), height=600)
-
-# Forecast components
-st.write('forecast components')
-_, fig2 = plot_forecast()
-components.html(fig2.to_html(full_html=False), height=600)
+# Usage
+fig1, fig2 = plot_forecast(m, forecast)
