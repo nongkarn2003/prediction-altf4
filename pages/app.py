@@ -67,4 +67,4 @@ fig1 = plot_plotly(m, forecast)
 components.html(fig1.to_html(full_html=False), height=600)
 
 fig2 = m.plot_components(forecast)
-components.html(fig2.to_html(full_html=False), height=600)
+st.pyplot(fig2)
