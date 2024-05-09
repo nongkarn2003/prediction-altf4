@@ -59,5 +59,12 @@ m.fit(df_train)
 future = m.make_future_dataframe(periods=period)
 forecast = m.predict(future)
 
-fig1 = model.plot(forecast) # Prophet's plot method creates a prediction graph
-st.write(fig1)
+@st.cache_data
+def plot_forecast():
+    fig1 = plot_plotly(m, forecast)
+    return fig1
+
+# Forecast data
+st.write('forecast data')
+fig1 = plot_forecast()
+components.html(fig1.to_html(full_html=False), height=600)
