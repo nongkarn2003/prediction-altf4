@@ -68,7 +68,7 @@ fig1 = plot_plotly(m, forecast)
 html_content = fig1.to_html(full_html=True)
 
 # เพิ่มความกว้างให้ HTML element ด้วย style attribute
-html_content_with_width = '<div style="width: 800px;">' + html_content + '</div>'
+html_content_with_width = '<div style="width: 1000px;">' + html_content + '</div>'
 
 # เพิ่มความกว้างให้ components.html()
 components.html(html_content_with_width, height=700)
