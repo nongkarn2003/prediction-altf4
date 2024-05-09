@@ -60,7 +60,7 @@ st.subheader('Forecast data')
 st.write(forecast.tail())
 
 st.write('forecast data')
-fig1 = plot(m,forecast)
+fig1 = plot_components(m,forecast)
 st.plotly_chart(fig1)
 
 st.write('forecast components')
