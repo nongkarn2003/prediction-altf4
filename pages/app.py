@@ -64,7 +64,14 @@ st.subheader('Forecast data')
 st.write(forecast.tail())
 
 fig1 = plot_plotly(m, forecast)
-components.html(fig1.to_html(full_html=False), height=600,use_container_width=True )
+
+html_content = fig1.to_html(full_html=True)
+
+# เพิ่มความกว้างและความสูงของ iframe โดยตรงผ่าน style attribute
+html_content_with_style = '<iframe srcdoc="' + html_content + '" width="800" height="600"></iframe>'
+
+# แสดง HTML content โดยใช้ components.html()
+components.html(html_content_with_style)
 
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
