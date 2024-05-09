@@ -71,7 +71,7 @@ html_content = fig1.to_html(full_html=True)
 html_content_with_width = '<div style="width: 1000px;">' + html_content + '</div>'
 
 # เพิ่มความกว้างให้ components.html()
-components.html(html_content_with_width,use_container_width=True, height=700)
+components.html(use_container_width=True, height=700)
 
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
