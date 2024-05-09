@@ -1,8 +1,7 @@
-altair
 numpy
 pandas
-pydeck
 streamlit
 yfinance
 prophet
 plotly
+datetime
