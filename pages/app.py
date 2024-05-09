@@ -63,8 +63,8 @@ forecast = m.predict(future)
 st.subheader('Forecast data')
 st.write(forecast.tail())
 
-fig1 = plot_plotly(m, forecast)  # m คือ instance ของ Prophet model, forecast คือผลการทำนาย
-st.plotly_chart(fig1)
+fig1 = plot_plotly(m, forecast)
+components.html(fig1.to_html(full_html=False), height=600)
 
 fig2 = m.plot_components(forecast)
-st.write(fig2)
+components.html(fig2.to_html(full_html=False), height=600)
