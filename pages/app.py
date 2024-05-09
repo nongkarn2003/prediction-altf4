@@ -64,14 +64,7 @@ st.subheader('Forecast data')
 st.write(forecast.tail())
 
 fig1 = plot_plotly(m, forecast)
-
-html_content = fig1.to_html(full_html=True)
-
-# เพิ่มความกว้างให้ HTML element ด้วย style attribute
-html_content_with_width = '<div style="width: 1000px;">' + html_content + '</div>'
-
-# เพิ่มความกว้างให้ components.html()
-components.html(use_container_width=True, height=700)
+components.html(fig1.to_html(full_html=False), height=600, )
 
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
