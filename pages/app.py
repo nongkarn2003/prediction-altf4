@@ -7,6 +7,7 @@ from plotly import graph_objects as go
 import plotly.graph_objs as go
 import streamlit.components.v1 as components
 from prophet.plot import plot_plotly
+from prophet.plot import plot_plotly
 
 
 
