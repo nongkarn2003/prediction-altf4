@@ -63,8 +63,8 @@ forecast = m.predict(future)
 st.subheader('Forecast data')
 st.write(forecast.tail())
 
-fig1 = plot_plotly(m, forecast, width=1000)  # Set width to 1000 pixels
-components.html(fig1.to_html(full_html=False), height=600)
+fig1 = plot_plotly(m, forecast)
+components.html(fig1.to_html(full_html=False), height=700 )
 
-fig2 = m.plot_components(forecast, width=1200)  # Set width to 1200 pixels
+fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
