@@ -59,9 +59,12 @@ m.fit(df_train)
 future = m.make_future_dataframe(periods=period)
 forecast = m.predict(future)
 
-@st.cache_data
-def plot_forecast():
-    fig1 = plot_plotly(m, forecast)
-    return fig1
+# Forecast data
+st.write('forecast data')
+fig1 = plot_plotly(m, forecast)
+components.html(fig1.to_html(full_html=False), height=600)
 
-plot_forecast()
+# Forecast components
+st.write('forecast components')
+fig2 = m.plot_components(forecast)
+components.html(fig2.to_html(full_html=False), height=600)
