@@ -64,7 +64,4 @@ def plot_forecast():
     fig1 = plot_plotly(m, forecast)
     return fig1
 
-# Forecast data
-st.write('forecast data')
-fig1 = plot_forecast()
-components.html(fig1.to_html(full_html=False), height=600)
+plot_forecast()
