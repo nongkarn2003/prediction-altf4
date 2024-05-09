@@ -5,6 +5,8 @@ from prophet import Prophet
 from prophet.plot import plot_plotly
 from plotly import graph_objects as go
 import plotly.graph_objs as go
+import streamlit.components.v1 as components
+
 
 
 
@@ -55,9 +57,20 @@ m = Prophet()
 m.fit(df_train)
 future = m.make_future_dataframe(periods=period)
 forecast = m.predict(future)
+import streamlit.components.v1 as components
 
-st.subheader('Forecast data')
-st.write(forecast.tail())
+@st.cache_data
+def plot_forecast():
+    fig1 = plot_plotly(m, forecast)
+    fig2 = m.plot_components(forecast)
+    return fig1, fig2
 
-fig1 = st.plotly_chart(m,forecast)
-st.write(fig1)
+# Forecast data
+st.write('forecast data')
+fig1, _ = plot_forecast()
+components.html(fig1.to_html(full_html=False), height=600)
+
+# Forecast components
+st.write('forecast components')
+_, fig2 = plot_forecast()
+components.html(fig2.to_html(full_html=False), height=600)
