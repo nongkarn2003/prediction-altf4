@@ -51,21 +51,20 @@ def plot_raw_data():
 
 plot_raw_data()
 
-#Forecasting
-df_train = data[['Date','Close']]
-df_train = df_train.rename(columns={"Date": "ds", "Close": "y"})
+# สร้าง future dataframe 
+periods = 365  # จำนวนวันที่ต้องการทำนาย (1 ปี)
+future = m.make_future_dataframe(periods=periods)
 
-m = Prophet()
-m.fit(df_train)
-future = m.make_future_dataframe(periods=period)
+# ทำนายค่าในอนาคต
 forecast = m.predict(future)
 
-# Forecast data
-st.write('forecast data')
+# Plot forecast data
+st.subheader('Forecast data')
+st.write(forecast.tail())  
 fig1 = plot_plotly(m, forecast)
-components.html(fig1.to_html(full_html=False), height=600)
+st.plotly_chart(fig1)
 
-# Forecast components
-st.write('forecast components')
+# Plot forecast components  
+st.write('Forecast components')
 fig2 = m.plot_components(forecast)
-components.html(fig2.to_html(full_html=False), height=600)
+st.write(fig2)
