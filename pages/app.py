@@ -64,7 +64,7 @@ st.subheader('Forecast data')
 st.write(forecast.tail())
 
 fig1 = plot_plotly(m, forecast)
-components.html(fig1.to_html(full_html=False), height=600, )
+components.html(fig1.to_html(full_html=False), height=600,use_container_width=True )
 
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
