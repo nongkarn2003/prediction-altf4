@@ -20,11 +20,11 @@ TODAY = date.today().strftime("%Y-%m-%d")
 
 st.title("Stock Prediction App")
 
-stocks = ("ADVANC.bk", "AOT.bk", "AWC.bk", "BANPU.bk", "BBL.bk", "BDMS.bk", "BEM.bk", "BGRIM.bk", "BH.bk", "BTS.bk",
-    "CBG.bk", "CENTEL.bk", "COM7.bk", "CPALL.bk", "CPF.bk", "CPN.bk", "CRC.bk", "DELTA.bk", "EA.bk", "EGCO.bk",
-    "GLOBAL.bk", "GPSC.bk", "GULF.bk", "HMPRO.bk", "INTUCH.bk", "IVL.bk", "KBANK.bk", "KCE.bk", "KTB.bk", "KTC.bk",
-    "LH.bk", "MINT.bk", "MTC.bk", "OR.bk", "OSP.bk", "PTT.bk", "PTTEP.bk", "PTTGC.bk", "RATCH.bk", "SAWAD.bk",
-    "SCB.bk", "SCC.bk", "SCGP.bk", "TISCO.bk", "TOP.bk", "TTB.bk", "TU.bk", "WHA.bk")
+stocks = ("ADVANC.BK", "AOT.BK", "AWC.BK", "BANPU.BK", "BBL.BK", "BDMS.BK", "BEM.BK", "BGRIM.BK", "BH.BK", "BTS.BK",
+    "CBG.BK", "CENTEL.BK", "COM7.BK", "CPALL.BK", "CPF.BK", "CPN.BK", "CRC.BK", "DELTA.BK", "EA.BK", "EGCO.BK",
+    "GLOBAL.BK", "GPSC.BK", "GULF.BK", "HMPRO.BK", "INTUCH.BK", "IVL.BK", "KBANK.BK", "KCE.BK", "KTB.BK", "KTC.BK",
+    "LH.BK", "MINT.BK", "MTC.BK", "OR.BK", "OSP.BK", "PTT.BK", "PTTEP.BK", "PTTGC.BK", "RATCH.BK", "SAWAD.BK",
+    "SCB.BK", "SCC.BK", "SCGP.BK", "TISCO.BK", "TOP.BK", "TTB.BK", "TU.BK", "WHA.BK")
 
 selected_stocks = st.selectbox("Select Symbol for prediction",stocks)
 
