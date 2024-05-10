@@ -70,7 +70,7 @@ fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
 
 [theme]
-primaryColor = "#0000FF"
+primaryColor = "#75b95b"
 backgroundColor = "#75b95b"
 secondaryBackgroundColor = "#F0F0F0"
 textColor = "#000000"
