@@ -7,7 +7,7 @@ from plotly import graph_objects as go
 import plotly.graph_objs as go
 import streamlit.components.v1 as components
 from prophet.plot import plot_plotly
-import prophet.performance_metrics as pm
+
 
 
 
@@ -69,5 +69,9 @@ components.html(fig1.to_html(full_html=False), height=600, )
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
 
-mse = pm.mean_squared_error(forecast['y'], forecast['yhat'])
+y_true = forecast['y'].values
+y_pred = forecast['yhat'].values
+mse = np.mean((y_true - y_pred) ** 2)
+
+# Display the MSE
 st.write(f"Mean Squared Error (MSE): {mse:.2f}")
