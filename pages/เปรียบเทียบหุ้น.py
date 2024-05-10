@@ -29,7 +29,7 @@ def relativereturn(df):
 
 if len(dropdown) > 0:
     df = yf.download(dropdown,start,end,)['Adj Close']
-    df = relativereturn(yf.download(dropdown,start,end,)['Adj Close'])
+    df = relativereturn(yf.download(dropdown,start,end,)['Adj Close'],progress=False)
     st.line_chart(df)
 
 
