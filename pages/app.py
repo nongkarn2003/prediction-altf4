@@ -70,7 +70,8 @@ components.html(fig1.to_html(full_html=False), height=600, )
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
 
-y_true = forecast.set_index('ds')['m'].values
+# Extract actual and predicted values
+y_true = forecast.set_index('ds')['y'].values
 y_pred = forecast.set_index('ds')['yhat'].values
 
 # Calculate the Mean Squared Error (MSE)
