@@ -70,9 +70,9 @@ components.html(fig1.to_html(full_html=False), height=600, )
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
 
-# Extract actual and forecasted values
-actual_values = df_train['y'].values[-period:]
-forecast_values = forecast['yhat'].values[-period:]
+min_length = min(len(actual_values), len(forecast_values))
+actual_values = actual_values[:min_length]
+forecast_values = forecast_values[:min_length]
 
 # Calculate MAE
 mae = np.mean(np.abs(actual_values - forecast_values))
