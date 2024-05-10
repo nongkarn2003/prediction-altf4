@@ -70,3 +70,19 @@ components.html(fig1.to_html(full_html=False), height=600, )
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
 
+# Extract actual and forecasted values
+actual_values = df_train['y'].values[-period:]
+forecast_values = forecast['yhat'].values[-period:]
+
+# Calculate MAE
+mae = np.mean(np.abs(actual_values - forecast_values))
+st.write("Mean Absolute Error (MAE):", mae)
+
+# Calculate MSE
+mse = np.mean((actual_values - forecast_values) ** 2)
+st.write("Mean Squared Error (MSE):", mse)
+
+# Calculate RMSE
+rmse = np.sqrt(mse)
+st.write("Root Mean Squared Error (RMSE):", rmse)
+
