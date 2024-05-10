@@ -68,3 +68,6 @@ components.html(fig1.to_html(full_html=False), height=600, )
 
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
+
+mse = pm.mean_squared_error(forecast['y'], forecast['yhat'])
+st.write(f"Mean Squared Error (MSE): {mse:.2f}")
