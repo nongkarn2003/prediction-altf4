@@ -18,6 +18,22 @@ streamlit_style = """
 
 st.markdown(streamlit_style, unsafe_allow_html=True)
 
+css_string = """
+<style>
+.st-emotion-cache-1dp5vir {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    left: 0px;
+    height: 0.125rem;
+    background-image: linear-gradient(90deg, #92CA68;, #92CA68;); /* Red to blue gradient */
+    z-index: 999990;
+}
+</style>
+"""
+
+# Render the CSS styles in your Streamlit app
+st.markdown(css_string, unsafe_allow_html=True)
 
 st.title("Stock Prediction App")
 
