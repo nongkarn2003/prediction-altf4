@@ -10,14 +10,15 @@ from prophet.plot import plot_plotly
 import numpy as np
 
 streamlit_style = """
-			<style>
-			@import url(https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&display=swap);
+<style>
+@import url(https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&display=swap);
 
-			html, body, [class*="css"]  {
-			font-family: 'Mitr', sans-serif;
-			}
-			</style>
-			"""
+* {
+    font-family: 'Mitr', sans-serif;
+}
+</style>
+"""
+
 st.markdown(streamlit_style, unsafe_allow_html=True)
 
 
