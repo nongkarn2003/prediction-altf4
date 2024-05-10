@@ -6,6 +6,17 @@ from prophet.plot import plot_plotly
 from plotly import graph_objects as go
 import pandas as pd
 
+streamlit_style = """
+<style>
+@import url(https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&display=swap);
+
+* {
+    font-family: 'Mitr', sans-serif;
+}
+</style>
+"""
+
+st.markdown(streamlit_style, unsafe_allow_html=True)
 
 
 st.title("Stock Prediction App")
