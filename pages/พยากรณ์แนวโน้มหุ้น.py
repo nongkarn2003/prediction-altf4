@@ -38,9 +38,9 @@ def load_data(ticker):
     data.reset_index(inplace=True)
     return data
 
-data_load_state = st.text("Load data....")
+data_load_state = st.text("กําลังโหลดข้อมูล....")
 data = load_data(selected_stocks)
-data_load_state.text("Loading data...done")
+data_load_state.text("โหลดข้อมูล...สําเร็จ")
 
 
 def plot_raw_data():
