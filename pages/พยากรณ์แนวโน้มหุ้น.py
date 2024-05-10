@@ -9,16 +9,16 @@ import streamlit.components.v1 as components
 from prophet.plot import plot_plotly
 import numpy as np
 
+streamlit_style = """
+			<style>
+			@import url(https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&display=swap);
 
-st.markdown("""
-<style>
-@import url(https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&display=swap);
-body {
-    font-family: 'Mitr', sans-serif;
-}
-</style>
-""", unsafe_allow_html=True)
-
+			html, body, [class*="css"]  {
+			font-family: 'Mitr', sans-serif;
+			}
+			</style>
+			"""
+st.markdown(streamlit_style, unsafe_allow_html=True)
 
 
 # เปลี่ยนแปลงพอร์ตเซิร์ฟเวอร์เมื่อมีการรัน Streamlit app
