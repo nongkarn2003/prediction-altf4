@@ -10,7 +10,14 @@ from prophet.plot import plot_plotly
 import numpy as np
 
 
-
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css?family=Your+Font+Name');
+body {
+    font-family: 'Mitr', sans-serif;
+}
+</style>
+""", unsafe_allow_html=True)
 
 
 
