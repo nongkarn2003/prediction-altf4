@@ -68,3 +68,9 @@ components.html(fig1.to_html(full_html=False), height=600, )
 
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
+
+[theme]
+primaryColor = "#0000FF"
+backgroundColor = "#75b95b"
+secondaryBackgroundColor = "#F0F0F0"
+textColor = "#000000"
