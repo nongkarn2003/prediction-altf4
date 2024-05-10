@@ -28,7 +28,7 @@ def relativereturn(df):
     return cumret
 
 if len(dropdown) > 0:
-    df = relativereturn(yf.download(dropdown,start,end,)['Adj Close'],progress=False)
+    df = relativereturn(yf.download(dropdown,start,end,progress=False)['Adj Close'])
     st.line_chart(df)
 
 
