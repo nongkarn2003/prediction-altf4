@@ -58,5 +58,36 @@ if len(dropdown) > 0:
     df = relativereturn(yf.download(dropdown,start,end,progress=False)['Adj Close'])
     st.line_chart(df)
 
+def get_financial_ratios(tickers):
+    ratios = {}
+    for ticker in tickers:
+        try:
+            stock_info = yf.Ticker(ticker).info
+            ratios[ticker] = {
+                'Price/Book': stock_info.get('priceToBook', 'N/A'),
+                'Price/Earnings': stock_info.get('trailingPE', 'N/A'),
+                'Price/Sales': stock_info.get('priceToSalesTrailingTwelveMonths', 'N/A'),
+                'Price/Cash Flow': stock_info.get('priceToOperatingCashFlowsTrailingTwelveMonths', 'N/A'),
+                'Debt/Equity': stock_info.get('debtToEquity', 'N/A'),
+                'Return on Equity': stock_info.get('returnOnEquity', 'N/A'),
+                'Return on Assets': stock_info.get('returnOnAssets', 'N/A'),
+                'Operating Margin': stock_info.get('operatingMargin', 'N/A'),
+                'Profit Margin': stock_info.get('profitMargins', 'N/A'),
+                'Current Ratio': stock_info.get('currentRatio', 'N/A'),
+                'Quick Ratio': stock_info.get('quickRatio', 'N/A'),
+            }
+        except:
+            pass
+    return pd.DataFrame.from_dict(ratios, orient='index')
+
+if len(dropdown) > 0:
+    ratios_df = get_financial_ratios(dropdown)
+    if not ratios_df.empty:
+        st.header('สัดส่วนการเงิน')
+        ratio_col = st.selectbox('เลือกสัดส่วนการเงิน', list(ratios_df.columns))
+        if ratio_col:
+            fig = px.bar(ratios_df[[ratio_col]], x=ratios_df.index, y=ratio_col, barmode='group', title=ratio_col)
+            st.plotly_chart(fig)
+
 
     
