@@ -1,52 +1,8 @@
 import streamlit as st
-from datetime import date
-import yfinance as yf 
-from prophet import Prophet
-from prophet.plot import plot_plotly
-from plotly import graph_objects as go
-import plotly.graph_objs as go
-import streamlit.components.v1 as components
-from prophet.plot import plot_plotly
-import numpy as np
+import yfinance as yf
+import pandas as pd
+import pandas_datareader as pdr
 
-streamlit_style = """
-<style>
-@import url(https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&display=swap);
-
-* {
-    font-family: 'Mitr', sans-serif;
-}
-</style>
-"""
-
-st.markdown(streamlit_style, unsafe_allow_html=True)
-
-css_string = """
-<style>
-.st-emotion-cache-1dp5vir {
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    left: 0px;
-    height: 0.125rem;
-    background-image: linear-gradient(90deg, #92CA68;, #92CA68;); /* Red to blue gradient */
-    z-index: 999990;
-}
-</style>
-"""
-
-# Render the CSS styles in your Streamlit app
-st.markdown(css_string, unsafe_allow_html=True)
-
-
-
-
-# เปลี่ยนแปลงพอร์ตเซิร์ฟเวอร์เมื่อมีการรัน Streamlit app
-port = 8502
-START = "2019-01-01"
-TODAY = date.today().strftime("%Y-%m-%d")
-
-st.title("Stock Prediction App")
 
 stocks = ("ADVANC.BK", "AOT.BK", "AWC.BK", "BANPU.BK", "BBL.BK", "BDMS.BK", "BEM.BK", "BGRIM.BK", "BH.BK", "BTS.BK",
     "CBG.BK", "CENTEL.BK", "COM7.BK", "CPALL.BK", "CPF.BK", "CPN.BK", "CRC.BK", "DELTA.BK", "EA.BK", "EGCO.BK",
@@ -54,63 +10,62 @@ stocks = ("ADVANC.BK", "AOT.BK", "AWC.BK", "BANPU.BK", "BBL.BK", "BDMS.BK", "BEM
     "LH.BK", "MINT.BK", "MTC.BK", "OR.BK", "OSP.BK", "PTT.BK", "PTTEP.BK", "PTTGC.BK", "RATCH.BK", "SAWAD.BK",
     "SCB.BK", "SCC.BK", "SCGP.BK", "TISCO.BK", "TOP.BK", "TTB.BK", "TU.BK", "WHA.BK")
 
-selected_stocks = st.selectbox("Select Symbol for prediction",stocks)
 
-n_years = st.slider("Year of Prediction",1,4)
-period = n_years * 365 
+st.header("Graham's Stock Valuation Calculator")
+ticker = st.selectbox("Select Symbol for Calculator",stocks)
+ng_pe = st.text_input('No Growth PE', 8.5)
+multiplier = st.text_input('Multiplier of Growth Rate', 2)
+margin = st.text_input('Margin of Safety(%)', 35)
+data = {}
 
-@st.cache_data
-def load_data(ticker):
-    data = yf.download(ticker,START,TODAY,progress=False)
-    data.reset_index(inplace=True)
-    return data
+def get_data(ticker, ng_pe, multiplier, margin):
+    ticker_data = yf.Ticker(ticker)
+    quote = ticker_data.info
+    try:
+        current_price = quote["regularMarketPreviousClose"]
+    except KeyError:
+        current_price = quote["ask"]  # or quote["bid"]
+    eps = quote["trailingEps"]
+    growth_rate = quote["earningsGrowth"]
+    aaa_df = pdr.get_data_fred('AAA')
+    current_yield = aaa_df.iloc[-1][0]
+    output = {
+        "current_price": float(current_price),
+        "eps": float(eps),
+        "growth_rate": float(growth_rate),
+        "current_yield": float(current_yield),
+        "ng_pe": float(ng_pe),
+        "multiplier": float(multiplier),
+        "margin": float(margin)
+    }
+    return output
 
-data_load_state = st.text("กําลังโหลดข้อมูล....")
-data = load_data(selected_stocks)
-data_load_state.text("โหลดข้อมูล...สําเร็จ")
-
-
-def plot_raw_data():
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=data['Date'],y=data['Open'],name='ราคาเปิด'))
-    fig.add_trace(go.Scatter(x=data['Date'],y=data['Close'],name='ราคาปิด'))
-    fig.layout.update(title_text="Time Series Data", xaxis_rangeslider_visible=True)
-    st.plotly_chart(fig)
-
-plot_raw_data()
-
-#Forecasting
-df_train = data[['Date','Close']]
-df_train = df_train.rename(columns={"Date": "ds", "Close": "y"})
-
-m = Prophet()
-m.fit(df_train)
-future = m.make_future_dataframe(periods=period)
-forecast = m.predict(future)
-
-st.subheader('Forecast data')
-st.write(forecast.tail())
-
-fig1 = plot_plotly(m, forecast)
-components.html(fig1.to_html(full_html=False), height=600, )
-
-fig2 = m.plot_components(forecast)
-st.pyplot(fig2)
-
-# Extract actual and forecasted values
-actual_values = df_train['y'].values[-period:]
-forecast_values = forecast['yhat'].values[-period:]
-
-# Calculate MAE
-mae = np.mean(np.abs(actual_values - forecast_values))
-st.write("Mean Absolute Error (MAE):", mae)
-
-# Calculate MSE
-mse = np.mean((actual_values - forecast_values) ** 2)
-st.write("Mean Squared Error (MSE):", mse)
-
-# Calculate RMSE
-rmse = np.sqrt(mse)
-st.write("Root Mean Squared Error (RMSE):", rmse)
-
-
+if st.button('Calculate'):
+    data = get_data(ticker, ng_pe, multiplier, margin)
+    st.markdown("""---""")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric(label="EPS($)", value=data["eps"])
+    with col2:
+        st.metric(label="Projected Growth Rate (5 years)", value=data["growth_rate"])
+    with col3:
+        st.metric(label="Current Yield AAA Corp Bond", value=data["current_yield"])
+    st.markdown("""---""")
+    int_value = (data["eps"] * (data["ng_pe"] + data["multiplier"] * data["growth_rate"]) * 4.4) / data["current_yield"]
+    int_value = round(int_value, 2)
+    stock_price = round(data["current_price"], 2)
+    margin_rate = data["margin"] / 100
+    accept_price = (1 - margin_rate) * int_value
+    accept_price = round(accept_price, 2)
+    col4, col5, col6 = st.columns(3)
+    with col4:
+        st.subheader('Current Stock Price($)')
+        st.subheader(f"**:blue[{stock_price}]**")
+    with col5:
+        st.subheader('Intrinsic Stock Value($)')
+        st.subheader(f"**:blue[{int_value}]**")
+    with col6:
+        st.subheader('Acceptable Buy Price($)')
+        st.subheader(f"**:blue[{accept_price}]**")
+else:
+    st.text("Click on Calculate button")
