@@ -5,6 +5,8 @@ from prophet import Prophet
 from prophet.plot import plot_plotly
 from plotly import graph_objects as go
 import pandas as pd
+import plotly.express as px
+
 
 streamlit_style = """
 <style>
