@@ -11,6 +11,19 @@ stocks = ("ADVANC.BK", "AOT.BK", "AWC.BK", "BANPU.BK", "BBL.BK", "BDMS.BK", "BEM
     "SCB.BK", "SCC.BK", "SCGP.BK", "TISCO.BK", "TOP.BK", "TTB.BK", "TU.BK", "WHA.BK")
 
 
+streamlit_style = """
+<style>
+@import url(https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&display=swap);
+
+* {
+    font-family: 'Mitr', sans-serif;
+}
+</style>
+"""
+
+st.markdown(streamlit_style, unsafe_allow_html=True)
+
+
 st.header("Graham's Stock Valuation Calculator")
 ticker = st.selectbox("Select Symbol for Calculator",stocks)
 ng_pe = st.text_input('No Growth PE', 8.5)
