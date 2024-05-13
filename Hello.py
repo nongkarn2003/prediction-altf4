@@ -69,13 +69,13 @@ if st.button('Calculate'):
     accept_price = round(accept_price, 2)
     col4, col5, col6 = st.columns(3)
     with col4:
-        st.subheader('Current Stock Price(฿)')
+        st.subheader('ราคาหุ้นปัจจุบัน(฿)')
         st.subheader(f"**:blue[{stock_price}]**")
     with col5:
-        st.subheader('Intrinsic Stock Value(฿)')
+        st.subheader('มูลค่าหุ้นที่แท้จริง(฿)')
         st.subheader(f"**:blue[{int_value}]**")
     with col6:
-        st.subheader('Acceptable Buy Price(฿)')
+        st.subheader('ราคาที่ยอมรับได้(฿)')
         st.subheader(f"**:blue[{accept_price}]**")
 else:
-    st.text("Click on Calculate button")
+    st.text("")
