@@ -55,11 +55,11 @@ if st.button('คํานวณ'):
     st.markdown("""---""")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric(label="EPS($)", value=data["eps"])
+        st.metric(label="EPS(฿)", value=data["eps"])
     with col2:
-        st.metric(label="Projected Growth Rate (5 years)", value=data["growth_rate"])
+        st.metric(label="อัตรการเติบโตระยะยาว (5 ปี)", value=data["growth_rate"])
     with col3:
-        st.metric(label="Current Yield AAA Corp Bond", value=data["current_yield"])
+        st.metric(label="ผลตอบแทนของบริษัท AAA", value=data["current_yield"])
     st.markdown("""---""")
     int_value = (data["eps"] * (data["ng_pe"] + data["multiplier"] * data["growth_rate"]) * 4.486) / data["current_yield"]
     int_value = round(int_value, 2)
