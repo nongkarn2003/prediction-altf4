@@ -21,8 +21,8 @@ streamlit_style = """
 st.markdown(streamlit_style, unsafe_allow_html=True)
 
 
-st.header("Graham's Stock Valuation Calculator")
-ticker = st.selectbox("Select Symbol for Calculator",stocks)
+st.header("ประเมินมูลค่าหุ้น")
+ticker = st.selectbox("เลือกหุ้น",stocks)
 ng_pe = st.text_input('No Growth PE', 8.5)
 multiplier = st.text_input('Multiplier of Growth Rate', 2)
 margin = st.text_input('Margin of Safety(%)', 35)
