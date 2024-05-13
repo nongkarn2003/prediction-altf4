@@ -28,7 +28,6 @@ css_string = """
     right: 0px;
     left: 0px;
     height: 0.125rem;
-    background-image: linear-gradient(90deg, #92CA68;, #92CA68;); /* Red to blue gradient */
     z-index: 999990;
 }
 </style>
