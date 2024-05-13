@@ -16,6 +16,9 @@ streamlit_style = """
 * {
     font-family: 'Mitr', sans-serif;
 }
+.st-emotion-cache-1dp5vir {   
+background-image: linear-gradient(90deg, rgb(0 0 0), rgb(0 0 0));
+}
 </style>
 """
 
