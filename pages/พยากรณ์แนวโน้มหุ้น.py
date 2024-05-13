@@ -51,7 +51,7 @@ def plot_raw_data():
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=data['Date'],y=data['Open'],name='ราคาเปิด'))
     fig.add_trace(go.Scatter(x=data['Date'],y=data['Close'],name='ราคาปิด'))
-    fig.layout.update(title_text="Time Series Data", xaxis_rangeslider_visible=True)
+    fig.layout.update(title_text="ราคาหุ้น", xaxis_rangeslider_visible=True)
     st.plotly_chart(fig)
 
 plot_raw_data()
