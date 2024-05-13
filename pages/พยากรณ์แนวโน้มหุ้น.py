@@ -27,13 +27,13 @@ port = 8502
 START = "2019-01-01"
 TODAY = date.today().strftime("%Y-%m-%d")
 
-st.title("Stock Prediction App")
+st.title("พยากรณ์แนวโน้มหุ้น")
 
 stocks = ('ADVANC.BK', 'AOT.BK', 'AWC.BK', 'BANPU.BK', 'BBL.BK', 'BDMS.BK', 'BEM.BK', 'BGRIM.BK', 'BH.BK', 'BTS.BK', 'CBG.BK', 'CENTEL.BK', 'COM7.BK', 'CPALL.BK', 'CPF.BK', 'CPN.BK', 'CRC.BK', 'DELTA.BK', 'EA.BK', 'EGCO.BK', 'GLOBAL.BK', 'GPSC.BK', 'GULF.BK', 'HMPRO.BK', 'INTUCH.BK', 'IVL.BK', 'KBANK.BK', 'KCE.BK', 'KTB.BK', 'KTC.BK', 'LH.BK', 'MINT.BK', 'MTC.BK', 'OR.BK', 'OSP.BK', 'PTT.BK', 'PTTEP.BK', 'PTTGC.BK', 'RATCH.BK', 'SAWAD.BK', 'SCB.BK', 'SCC.BK', 'SCGP.BK', 'TISCO.BK', 'TLI.BK', 'TOP.BK', 'TRUE.BK', 'TTB.BK', 'TU.BK', 'WHA.BK')
 
-selected_stocks = st.selectbox("Select Symbol for prediction",stocks)
+selected_stocks = st.selectbox("เลือกหุ้น",stocks)
 
-n_years = st.slider("Year of Prediction",1,4)
+n_years = st.slider("ปีที่ต้องการพยากรณ์",1,4)
 period = n_years * 365 
 
 @st.cache_data
@@ -65,7 +65,7 @@ m.fit(df_train)
 future = m.make_future_dataframe(periods=period)
 forecast = m.predict(future)
 
-st.subheader('Forecast data')
+st.subheader('ช้อมูล การพยากรณ์')
 st.write(forecast.tail())
 
 fig1 = plot_plotly(m, forecast)
