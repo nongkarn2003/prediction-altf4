@@ -23,9 +23,9 @@ st.markdown(streamlit_style, unsafe_allow_html=True)
 
 st.header("ประเมินมูลค่าหุ้น")
 ticker = st.selectbox("เลือกหุ้น",stocks)
-ng_pe = st.text_input('No Growth PE', 8.5)
-multiplier = st.text_input('Multiplier of Growth Rate', 2)
-margin = st.text_input('Margin of Safety(%)', 35)
+ng_pe = st.text_input('PE ที่ไม่มีการเติบโต', 8.5)
+multiplier = st.text_input('ระยะการเติบโต', 2)
+margin = st.text_input('ส่วนเผื่อราคา (%)', 35)
 data = {}
 
 def get_data(ticker, ng_pe, multiplier, margin):
