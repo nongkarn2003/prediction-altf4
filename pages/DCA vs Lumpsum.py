@@ -44,10 +44,10 @@ def main():
     st.title("DCA vs Lump Sum Investment")
 
     # User input for investment type
-    investment_type = st.radio("Select investment type", ["DCA", "Lump Sum"])
+    investment_type = st.radio("เลือกวิธีการลงทุน", ["DCA", "Lump Sum"])
 
     # User input for stock ticker
-    selected_ticker = st.selectbox("Select stock ticker", tickers)
+    selected_ticker = st.selectbox("เลือกหุ้น", tickers)
 
     # User input for investment amount and duration
     if investment_type == "DCA":
