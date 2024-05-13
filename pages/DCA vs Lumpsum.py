@@ -4,6 +4,38 @@ import pandas as pd
 import plotly.graph_objects as go
 from datetime import date, timedelta
 
+streamlit_style = """
+<style>
+@import url(https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&display=swap);
+
+* {
+    font-family: 'Mitr', sans-serif;
+}
+.st-emotion-cache-1dp5vir {   
+background-image: linear-gradient(90deg, rgb(0 0 0), rgb(0 0 0));
+}
+</style>
+"""
+
+st.markdown(streamlit_style, unsafe_allow_html=True)
+
+css_string = """
+<style>
+.st-emotion-cache-1dp5vir {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    left: 0px;
+    height: 0.125rem;
+    z-index: 999990;
+}
+</style>
+"""
+
+# Render the CSS styles in your Streamlit app
+st.markdown(css_string, unsafe_allow_html=True)
+
+
 # List of stock tickers
 tickers = ["ADVANC.BK", "AOT.BK", "AWC.BK", "BANPU.BK", "BBL.BK", "BDMS.BK", "BEM.BK", "BGRIM.BK", "BH.BK", "BTS.BK", "CBG.BK", "CENTEL.BK", "COM7.BK", "CPALL.BK", "CPF.BK", "CPN.BK", "CRC.BK", "DELTA.BK", "EA.BK", "EGCO.BK", "GLOBAL.BK", "GPSC.BK", "GULF.BK", "HMPRO.BK", "INTUCH.BK", "IVL.BK", "KBANK.BK", "KCE.BK", "KTB.BK", "KTC.BK", "LH.BK", "MINT.BK", "MTC.BK", "OR.BK", "OSP.BK", "PTT.BK", "PTTEP.BK", "PTTGC.BK", "RATCH.BK", "SAWAD.BK", "SCB.BK", "SCC.BK", "SCGP.BK", "TISCO.BK", "TOP.BK", "TTB.BK", "TU.BK", "WHA.BK"]
 
