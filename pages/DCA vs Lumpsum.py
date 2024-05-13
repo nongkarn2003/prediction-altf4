@@ -62,7 +62,7 @@ def main():
 
     # Get stock data
     end_date = date.today()
-    stock_data = yf.download(selected_ticker, start=start_date, end=end_date)
+    stock_data = yf.download(selected_ticker, start=start_date, end=end_date,progress=False)
 
     # Calculate returns and plot
     if st.button("Calculate"):
