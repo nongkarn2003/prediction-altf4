@@ -50,7 +50,7 @@ def get_data(ticker, ng_pe, multiplier, margin):
     }
     return output
 
-if st.button('Calculate'):
+if st.button('คํานวณ'):
     data = get_data(ticker, ng_pe, multiplier, margin)
     st.markdown("""---""")
     col1, col2, col3 = st.columns(3)
