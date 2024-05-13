@@ -22,6 +22,7 @@ st.markdown(streamlit_style, unsafe_allow_html=True)
 
 
 st.header("ประเมินมูลค่าหุ้น")
+st.write('สูตรประเมินแบบ Benjamin Graham')
 ticker = st.selectbox("เลือกหุ้น",stocks)
 ng_pe = st.text_input('PE ที่ไม่มีการเติบโต', 8.5)
 multiplier = st.text_input('ระยะการเติบโต', 2)
