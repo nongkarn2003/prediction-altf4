@@ -51,21 +51,21 @@ def main():
 
     # User input for investment amount and duration
     if investment_type == "DCA":
-        monthly_amount = st.number_input("Monthly investment amount", min_value=0.0, step=1.0)
-        duration_months = st.number_input("Investment duration (months)", min_value=1, step=1)
+        monthly_amount = st.number_input("จํานวนเงินลงทุนต่อเดือน", min_value=0.0, step=1.0)
+        duration_months = st.number_input("ระยะเวลาการลงทุน (เดือน)", min_value=1, step=1)
     else:
-        lump_sum_amount = st.number_input("Lump sum investment amount", min_value=0.0, step=1.0)
-        duration_months = st.number_input("Investment duration (months)", min_value=1, step=1)
+        lump_sum_amount = st.number_input("จํานวนเงินลงทุน", min_value=0.0, step=1.0)
+        duration_months = st.number_input("ระยะเวลาการลงทุน (เดือน)", min_value=1, step=1)
 
     # User input for start date
-    start_date = st.date_input("Select start date", value=date(2018, 1, 1), max_value=date.today() - timedelta(days=1))
+    start_date = st.date_input("วันที่เริ่มลงทุน", value=date(2018, 1, 1), max_value=date.today() - timedelta(days=1))
 
     # Get stock data
     end_date = date.today()
     stock_data = yf.download(selected_ticker, start=start_date, end=end_date,progress=False)
 
     # Calculate returns and plot
-    if st.button("Calculate"):
+    if st.button("คํานวณ"):
         if investment_type == "DCA":
             total_invested = monthly_amount * duration_months
             dca_data = simulate_dca(stock_data, monthly_amount, duration_months)
