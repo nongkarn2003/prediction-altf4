@@ -101,8 +101,8 @@ def plot_returns_and_price(data, initial_investment, stock_data, investment_type
         dates = data["Date"]
         total_invested = data["Total Invested"]
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=dates, y=portfolio_value, mode="lines", name="Portfolio Value"))
-        fig.add_trace(go.Scatter(x=dates, y=total_invested, mode="lines", name="Total Invested"))
+        fig.add_trace(go.Scatter(x=dates, y=portfolio_value, mode="lines", name="มูลค่าของพอร์ต"))
+        fig.add_trace(go.Scatter(x=dates, y=total_invested, mode="lines", name="จํานวนเงินลงทุน"))
         fig.update_layout(title="DCA Investment Returns and Stock Price", xaxis_title="Date", yaxis_title="Value")
     else:
         portfolio_value = stock_data["Adj Close"] * initial_investment / stock_data.iloc[0]["Adj Close"]
@@ -120,16 +120,16 @@ def display_summary(data, initial_investment, final_portfolio_value=None, invest
         final_portfolio_value = data["Portfolio Value"].iloc[-1]
         total_invested = data["Total Invested"].iloc[-1]
         returns = (final_portfolio_value - total_invested) / total_invested * 100
-        st.write(f"**Summary for DCA Investment**")
-        st.write(f"Final Portfolio Value: {final_portfolio_value:.2f}")
-        st.write(f"Total Invested: {total_invested:.2f}")
-        st.write(f"Returns: {returns:.2f}%")
+        st.write(f"**ภาพรวมของการลงทุนแบบ DCA **")
+        st.write(f"มูลค่าของพอร์ต: {final_portfolio_value:.2f}")
+        st.write(f"จํานวนเงินที่ลงทุน: {total_invested:.2f}")
+        st.write(f"ผลตอบแทน: {returns:.2f}%")
     else:
         returns = (final_portfolio_value - initial_investment) / initial_investment * 100
-        st.write(f"**Summary for Lump Sum Investment**")
-        st.write(f"Final Portfolio Value: {final_portfolio_value:.2f}")
-        st.write(f"Initial Investment: {initial_investment:.2f}")
-        st.write(f"Returns: {returns:.2f}%")
+        st.write(f"**ภาพรวมของการลงทุนแบบ Lump Sum**")
+        st.write(f"มูลค่าของพอร์ต: {final_portfolio_value:.2f}")
+        st.write(f"จํานวนเงินที่ลงทุน: {initial_investment:.2f}")
+        st.write(f"ผลตอบแทน: {returns:.2f}%")
 
 if __name__ == "__main__":
     main()
