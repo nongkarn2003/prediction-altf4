@@ -108,8 +108,8 @@ def plot_returns_and_price(data, initial_investment, stock_data, investment_type
         portfolio_value = stock_data["Adj Close"] * initial_investment / stock_data.iloc[0]["Adj Close"]
         dates = stock_data.index[:duration_months * 21]  # Adjust the number of data points based on the duration
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=dates, y=portfolio_value[:len(dates)], mode="lines", name="Portfolio Value"))
-        fig.add_trace(go.Scatter(x=dates, y=[initial_investment] * len(dates), mode="lines", name="Initial Investment"))
+        fig.add_trace(go.Scatter(x=dates, y=portfolio_value[:len(dates)], mode="lines", name="มูลค่าของพอร์ต"))
+        fig.add_trace(go.Scatter(x=dates, y=[initial_investment] * len(dates), mode="lines", name="จํานวนเงินลงทุน"))
         fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ Lump Sum", xaxis_title="Date", yaxis_title="Value")
 
     st.plotly_chart(fig)
