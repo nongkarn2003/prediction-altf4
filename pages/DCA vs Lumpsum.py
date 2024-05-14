@@ -103,14 +103,14 @@ def plot_returns_and_price(data, initial_investment, stock_data, investment_type
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=dates, y=portfolio_value, mode="lines", name="มูลค่าของพอร์ต"))
         fig.add_trace(go.Scatter(x=dates, y=total_invested, mode="lines", name="จํานวนเงินลงทุน"))
-        fig.update_layout(title="DCA Investment Returns and Stock Price", xaxis_title="Date", yaxis_title="Value")
+        fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ DCA", xaxis_title="Date", yaxis_title="Value")
     else:
         portfolio_value = stock_data["Adj Close"] * initial_investment / stock_data.iloc[0]["Adj Close"]
         dates = stock_data.index[:duration_months * 21]  # Adjust the number of data points based on the duration
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=dates, y=portfolio_value[:len(dates)], mode="lines", name="Portfolio Value"))
         fig.add_trace(go.Scatter(x=dates, y=[initial_investment] * len(dates), mode="lines", name="Initial Investment"))
-        fig.update_layout(title="Lump Sum Investment Returns and Stock Price", xaxis_title="Date", yaxis_title="Value")
+        fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ Lump Sum", xaxis_title="Date", yaxis_title="Value")
 
     st.plotly_chart(fig)
 
@@ -120,7 +120,7 @@ def display_summary(data, initial_investment, final_portfolio_value=None, invest
         final_portfolio_value = data["Portfolio Value"].iloc[-1]
         total_invested = data["Total Invested"].iloc[-1]
         returns = (final_portfolio_value - total_invested) / total_invested * 100
-        st.write(f"**ภาพรวมของการลงทุนแบบ DCA **")
+        st.write(f"**ภาพรวมของการลงทุนแบบ DCA**")
         st.write(f"มูลค่าของพอร์ต: {final_portfolio_value:.2f}")
         st.write(f"จํานวนเงินที่ลงทุน: {total_invested:.2f}")
         st.write(f"ผลตอบแทน: {returns:.2f}%")
