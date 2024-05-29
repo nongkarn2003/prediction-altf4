@@ -23,12 +23,12 @@ def get_stock_data(ticker):
     }
 
 # Streamlit app
-st.title("Stock Screener")
+st.title("สกรีน หุ้น")
 
 # Expander for filter criteria
-with st.expander("Filter Criteria", expanded=True):
+with st.expander("เลือกสัดส่วน", expanded=True):
     selected_filters = st.multiselect(
-        "Select Filters",
+        "เลือกตัวกรอง",
         ["PE Ratio", "PB Ratio", "Debt to Equity", "ROE", "ROA"],
         default=["PE Ratio", "PB Ratio", "Debt to Equity", "ROE", "ROA"]
     )
@@ -36,15 +36,15 @@ with st.expander("Filter Criteria", expanded=True):
     pe_ratio = pb_ratio = de_ratio = roe = roa = None
 
     if "PE Ratio" in selected_filters:
-        pe_ratio = st.number_input("PE Ratio (Maximum)", min_value=0.0, value=1000.0, step=0.1)
+        pe_ratio = st.number_input("PE Ratio (มากสุด)", min_value=0.0, value=1000.0, step=0.1)
     if "PB Ratio" in selected_filters:
-        pb_ratio = st.number_input("PB Ratio (Maximum)", min_value=0.0, value=1000.0, step=0.1)
+        pb_ratio = st.number_input("PB Ratio (มากสุด)", min_value=0.0, value=1000.0, step=0.1)
     if "Debt to Equity" in selected_filters:
-        de_ratio = st.number_input("Debt to Equity (Maximum)", min_value=0.0, value=1000.0, step=0.1)
+        de_ratio = st.number_input("Debt to Equity (มากสุด)", min_value=0.0, value=1000.0, step=0.1)
     if "ROE" in selected_filters:
-        roe = st.number_input("ROE (Minimum, in %)", min_value=0.0, value=0.0, step=0.1)
+        roe = st.number_input("ROE (ขั้นตํ่า %)", min_value=0.0, value=0.0, step=0.1)
     if "ROA" in selected_filters:
-        roa = st.number_input("ROA (Minimum, in %)", min_value=0.0, value=0.0, step=0.1)
+        roa = st.number_input("ROA (ขั้นตํ่า %)", min_value=0.0, value=0.0, step=0.1)
 
 # Load data for all stocks
 data = []
@@ -80,7 +80,7 @@ if roa is not None and roa > 0.0:
     filtered_df = filtered_df[filtered_df['ROA'] >= (roa / 100)]
 
 # Show the filtered stocks in a scrollable table
-st.header("Filtered Stocks")
+st.header("หุ้นที่สกรีนแล้ว")
 st.dataframe(filtered_df.style.format({
     "PE Ratio": "{:.2f}",
     "PB Ratio": "{:.2f}",
