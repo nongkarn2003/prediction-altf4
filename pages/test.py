@@ -63,6 +63,9 @@ def main():
     end_date = date.today()
     stock_data = yf.download(selected_ticker, start=start_date, end=end_date, progress=False)
 
+    # Forward fill missing data to handle non-trading days
+    stock_data = stock_data.ffill()
+
     # Calculate returns and plot
     if st.button("คำนวณ"):
         if investment_type == "DCA":
@@ -86,8 +89,6 @@ def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
     for i in range(duration_months):
         date = start_date + pd.DateOffset(months=i)  # Calculate the monthly date
         adjusted_date = stock_data.index.asof(date)  # Adjust to the closest trading day
-        if pd.isna(adjusted_date):
-            continue  # Skip if there's no trading day close to the calculated date
         price = stock_data.loc[adjusted_date, "Adj Close"]
         shares_bought = monthly_amount / price
         shares += shares_bought
