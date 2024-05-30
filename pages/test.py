@@ -62,20 +62,20 @@ def main():
 
     # Get stock data
     end_date = date.today()
-    stock_data = yf.download(selected_ticker, start=start_date, end=end_date,progress=False)
+    stock_data = yf.download(selected_ticker, start=start_date, end=end_date, progress=False)
 
     # Calculate returns and plot
     if st.button("คำนวณ"):
         if investment_type == "DCA":
             total_invested = monthly_amount * duration_months
-            dca_data = simulate_dca(stock_data, monthly_amount, duration_months)
+            dca_data = simulate_dca(stock_data, monthly_amount, duration_months, start_date)
             fig = plot_returns_and_price(dca_data, total_invested, stock_data, investment_type)
-            display_summary(dca_data, total_invested, stock_data, investment_type=investment_type)
+            display_summary(dca_data, total_invested, investment_type)
         else:
             initial_shares = lump_sum_amount / stock_data.iloc[0]["Adj Close"]
             final_portfolio_value = initial_shares * stock_data.iloc[-1]["Adj Close"]
-            fig = plot_returns_and_price(stock_data, lump_sum_amount, stock_data, investment_type, duration_months)
-            display_summary(stock_data, lump_sum_amount, stock_data, final_portfolio_value, investment_type)
+            fig = plot_returns_and_price(stock_data, lump_sum_amount, stock_data, investment_type)
+            display_summary(stock_data, lump_sum_amount, investment_type, final_portfolio_value)
 
 # Function to simulate DCA
 def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
@@ -97,26 +97,25 @@ def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
     return dca_data
 
 # Function to plot returns and stock price
-def plot_returns_and_price(data, initial_investment, stock_data, investment_type, duration_months=None):
-     if investment_type == "DCA":
-        total_invested = monthly_amount * duration_months
-        dca_data = simulate_dca(stock_data, monthly_amount, duration_months, start_date)
-        fig = plot_returns_and_price(dca_data, total_invested, stock_data, investment_type)
-        display_summary(dca_data, total_invested, stock_data, investment_type=investment_type)
-      else:
-            initial_shares = initial_investment / stock_data.iloc[0]["Adj Close"]
-            portfolio_value = initial_shares * stock_data["Adj Close"]
-            dates = stock_data.index
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(x=dates, y=portfolio_value, mode="lines", name="มูลค่าของพอร์ต"))
-            fig.add_trace(go.Scatter(x=dates, y=[initial_investment] * len(dates), mode="lines", name="จำนวนเงินลงทุน"))
-            fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ Lump Sum", xaxis_title="Date", yaxis_title="Value")
+def plot_returns_and_price(data, initial_investment, stock_data, investment_type):
+    fig = go.Figure()
 
+    if investment_type == "DCA":
+        fig.add_trace(go.Scatter(x=data["Date"], y=data["Portfolio Value"], mode="lines", name="มูลค่าของพอร์ต"))
+        fig.add_trace(go.Scatter(x=data["Date"], y=data["Total Invested"], mode="lines", name="จำนวนเงินลงทุน"))
+        fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ DCA", xaxis_title="Date", yaxis_title="Value")
+    else:
+        initial_shares = initial_investment / stock_data.iloc[0]["Adj Close"]
+        portfolio_value = initial_shares * stock_data["Adj Close"]
+        dates = stock_data.index
+        fig.add_trace(go.Scatter(x=dates, y=portfolio_value, mode="lines", name="มูลค่าของพอร์ต"))
+        fig.add_trace(go.Scatter(x=dates, y=[initial_investment] * len(dates), mode="lines", name="จำนวนเงินลงทุน"))
+        fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ Lump Sum", xaxis_title="Date", yaxis_title="Value")
 
     st.plotly_chart(fig)
 
 # Function to display summary
-def display_summary(data, initial_investment, stock_data, final_portfolio_value=None, investment_type="DCA"):
+def display_summary(data, initial_investment, investment_type, final_portfolio_value=None):
     if investment_type == "DCA":
         final_portfolio_value = data["Portfolio Value"].iloc[-1]
         total_invested = data["Total Invested"].iloc[-1]
@@ -126,12 +125,11 @@ def display_summary(data, initial_investment, stock_data, final_portfolio_value=
         st.write(f"จำนวนเงินที่ลงทุน: {total_invested:.2f}")
         st.write(f"ผลตอบแทน: {returns:.2f}%")
     else:
-        final_portfolio_value = initial_investment / stock_data.iloc[0]["Adj Close"]
-        final_portfolio_value = final_portfolio_value * stock_data["Adj Close"].iloc[-1]
         returns = (final_portfolio_value - initial_investment) / initial_investment * 100
         st.write(f"**ภาพรวมของการลงทุนแบบ Lump Sum**")
         st.write(f"มูลค่าของพอร์ต: {final_portfolio_value:.2f}")
         st.write(f"จำนวนเงินที่ลงทุน: {initial_investment:.2f}")
         st.write(f"ผลตอบแทน: {returns:.2f}%")
+
 if __name__ == "__main__":
     main()
