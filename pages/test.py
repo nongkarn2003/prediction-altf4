@@ -124,4 +124,4 @@ def plot_returns_and_price(data, initial_investment, stock_data, investment_type
 
 # Function to display summary
 def display_summary(data, initial_investment, final_portfolio_value=None, investment_type="DCA"):
-    if investment_type == "D"
+    if investment_type == "D":
