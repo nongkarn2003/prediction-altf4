@@ -103,7 +103,7 @@ def plot_returns_and_price(data, initial_investment, stock_data, investment_type
         dca_data = simulate_dca(stock_data, monthly_amount, duration_months, start_date)
         fig = plot_returns_and_price(dca_data, total_invested, stock_data, investment_type)
         display_summary(dca_data, total_invested, stock_data, investment_type=investment_type)
-    else:
+      else:
         initial_shares = initial_investment / stock_data.iloc[0]["Adj Close"]
         portfolio_value = initial_shares * stock_data["Adj Close"]
         dates = stock_data.index
