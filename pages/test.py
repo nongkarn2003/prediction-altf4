@@ -78,33 +78,31 @@ def main():
             display_summary(stock_data, lump_sum_amount, stock_data, final_portfolio_value, investment_type)
 
 # Function to simulate DCA
-def simulate_dca(stock_data, monthly_amount, duration_months):
+def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
     dca_data = pd.DataFrame(columns=["Date", "Shares", "Total Invested", "Portfolio Value"])
     total_invested = 0
     shares = 0
+    start_date = pd.to_datetime(start_date)  # Convert start_date to datetime
 
     for i in range(duration_months):
-        date = stock_data.index[i]  # Assuming monthly investment on the first trading day
-        price = stock_data.loc[date, "Adj Close"]
-        shares_bought = monthly_amount / price
-        shares += shares_bought
-        total_invested += monthly_amount
-
-        portfolio_value = shares * price
-        dca_data.loc[i] = [date, shares, total_invested, portfolio_value]
+        date = start_date + pd.DateOffset(months=i)  # Calculate the monthly date
+        if date in stock_data.index:  # Check if the date is a trading day
+            price = stock_data.loc[date, "Adj Close"]
+            shares_bought = monthly_amount / price
+            shares += shares_bought
+            total_invested += monthly_amount
+            portfolio_value = shares * price
+            dca_data.loc[len(dca_data)] = [date, shares, total_invested, portfolio_value]
 
     return dca_data
 
 # Function to plot returns and stock price
 def plot_returns_and_price(data, initial_investment, stock_data, investment_type, duration_months=None):
-    if investment_type == "DCA":
-        portfolio_value = data["Portfolio Value"]
-        dates = data["Date"]
-        total_invested = data["Total Invested"]
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=dates, y=portfolio_value, mode="lines", name="มูลค่าของพอร์ต"))
-        fig.add_trace(go.Scatter(x=dates, y=total_invested, mode="lines", name="จํานวนเงินลงทุน"))
-        fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ DCA", xaxis_title="Date", yaxis_title="Value")
+     if investment_type == "DCA":
+        total_invested = monthly_amount * duration_months
+        dca_data = simulate_dca(stock_data, monthly_amount, duration_months, start_date)
+        fig = plot_returns_and_price(dca_data, total_invested, stock_data, investment_type)
+        display_summary(dca_data, total_invested, stock_data, investment_type=investment_type)
     else:
         initial_shares = initial_investment / stock_data.iloc[0]["Adj Close"]
         portfolio_value = initial_shares * stock_data["Adj Close"]
