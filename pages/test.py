@@ -125,7 +125,8 @@ def display_summary(data, initial_investment, stock_data, final_portfolio_value=
         st.write(f"จำนวนเงินที่ลงทุน: {total_invested:.2f}")
         st.write(f"ผลตอบแทน: {returns:.2f}%")
     else:
-        final_portfolio_value = portfolio_value.iloc[-1]
+        final_portfolio_value = initial_investment / stock_data.iloc[0]["Adj Close"]
+        final_portfolio_value = final_portfolio_value * stock_data["Adj Close"].iloc[-1]
         returns = (final_portfolio_value - initial_investment) / initial_investment * 100
         st.write(f"**ภาพรวมของการลงทุนแบบ Lump Sum**")
         st.write(f"มูลค่าของพอร์ต: {final_portfolio_value:.2f}")
