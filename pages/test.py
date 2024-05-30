@@ -105,13 +105,13 @@ def plot_returns_and_price(data, initial_investment, stock_data, investment_type
         fig.add_trace(go.Scatter(x=dates, y=total_invested, mode="lines", name="จํานวนเงินลงทุน"))
         fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ DCA", xaxis_title="Date", yaxis_title="Value")
     else:
-        portfolio_value = stock_data["Adj Close"] * initial_investment / stock_data.iloc[0]["Adj Close"]
-        dates = stock_data.index[:duration_months * 21]  # Adjust the number of data points based on the duration
+        initial_shares = initial_investment / stock_data.iloc[0]["Adj Close"]
+        portfolio_value = initial_shares * stock_data["Adj Close"]
+        dates = stock_data.index
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=dates, y=portfolio_value[:len(dates)], mode="lines", name="มูลค่าของพอร์ต"))
-        fig.add_trace(go.Scatter(x=dates, y=[initial_investment] * len(dates), mode="lines", name="จํานวนเงินลงทุน"))
+        fig.add_trace(go.Scatter(x=dates, y=portfolio_value, mode="lines", name="มูลค่าของพอร์ต"))
+        fig.add_trace(go.Scatter(x=dates, y=[initial_investment] * len(dates), mode="lines", name="จำนวนเงินลงทุน"))
         fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ Lump Sum", xaxis_title="Date", yaxis_title="Value")
-
     st.plotly_chart(fig)
 
 # Function to display summary
@@ -125,12 +125,11 @@ def display_summary(data, initial_investment, stock_data, final_portfolio_value=
         st.write(f"จำนวนเงินที่ลงทุน: {total_invested:.2f}")
         st.write(f"ผลตอบแทน: {returns:.2f}%")
     else:
-        final_portfolio_value = stock_data["Adj Close"].iloc[-1] * initial_investment / stock_data.iloc[0]["Adj Close"]
+        final_portfolio_value = portfolio_value.iloc[-1]
         returns = (final_portfolio_value - initial_investment) / initial_investment * 100
         st.write(f"**ภาพรวมของการลงทุนแบบ Lump Sum**")
         st.write(f"มูลค่าของพอร์ต: {final_portfolio_value:.2f}")
         st.write(f"จำนวนเงินที่ลงทุน: {initial_investment:.2f}")
         st.write(f"ผลตอบแทน: {returns:.2f}%")
-
 if __name__ == "__main__":
     main()
