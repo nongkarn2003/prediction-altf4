@@ -86,7 +86,7 @@ def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
     for i in range(duration_months):
         date = start_date + pd.DateOffset(months=i)  # Calculate the monthly date
         if date not in stock_data.index:  # Check if the date is not a trading day
-            date = stock_data.index[stock_data.index.get_loc(date, method='bfill')]  # Adjust to the next trading day
+            date = stock_data.index.asof(date)  # Adjust to the closest trading day
         price = stock_data.loc[date, "Adj Close"]
         shares_bought = monthly_amount / price
         shares += shares_bought
