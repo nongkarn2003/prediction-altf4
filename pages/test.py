@@ -72,7 +72,7 @@ def main():
             fig = plot_returns_and_price(dca_data, total_invested, stock_data, investment_type)
             display_summary(dca_data, total_invested, stock_data, investment_type=investment_type)
         else:
-            initial_shares = lump_sum_amount / stock_data.iloc[0]["Adj Close"]
+            initial_shares = initial_investment / stock_data.iloc[0]["Adj Close"]
             final_portfolio_value = initial_shares * stock_data.iloc[-1]["Adj Close"]
             fig = plot_returns_and_price(stock_data, lump_sum_amount, stock_data, investment_type, duration_months)
             display_summary(stock_data, lump_sum_amount, stock_data, final_portfolio_value, investment_type)
