@@ -35,7 +35,6 @@ css_string = """
 # Render the CSS styles in your Streamlit app
 st.markdown(css_string, unsafe_allow_html=True)
 
-
 # List of stock tickers
 tickers = ["ADVANC.BK", "AOT.BK", "AWC.BK", "BANPU.BK", "BBL.BK", "BDMS.BK", "BEM.BK", "BGRIM.BK", "BH.BK", "BTS.BK", "CBG.BK", "CENTEL.BK", "COM7.BK", "CPALL.BK", "CPF.BK", "CPN.BK", "CRC.BK", "DELTA.BK", "EA.BK", "EGCO.BK", "GLOBAL.BK", "GPSC.BK", "GULF.BK", "HMPRO.BK", "INTUCH.BK", "IVL.BK", "KBANK.BK", "KCE.BK", "KTB.BK", "KTC.BK", "LH.BK", "MINT.BK", "MTC.BK", "OR.BK", "OSP.BK", "PTT.BK", "PTTEP.BK", "PTTGC.BK", "RATCH.BK", "SAWAD.BK", "SCB.BK", "SCC.BK", "SCGP.BK", "TISCO.BK", "TOP.BK", "TTB.BK", "TU.BK", "WHA.BK"]
 
@@ -86,13 +85,14 @@ def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
 
     for i in range(duration_months):
         date = start_date + pd.DateOffset(months=i)  # Calculate the monthly date
-        if date in stock_data.index:  # Check if the date is a trading day
-            price = stock_data.loc[date, "Adj Close"]
-            shares_bought = monthly_amount / price
-            shares += shares_bought
-            total_invested += monthly_amount
-            portfolio_value = shares * price
-            dca_data.loc[len(dca_data)] = [date, shares, total_invested, portfolio_value]
+        if date not in stock_data.index:  # Check if the date is not a trading day
+            date = stock_data.index[stock_data.index.get_loc(date, method='bfill')]  # Adjust to the next trading day
+        price = stock_data.loc[date, "Adj Close"]
+        shares_bought = monthly_amount / price
+        shares += shares_bought
+        total_invested += monthly_amount
+        portfolio_value = shares * price
+        dca_data.loc[len(dca_data)] = [date, shares, total_invested, portfolio_value]
 
     return dca_data
 
