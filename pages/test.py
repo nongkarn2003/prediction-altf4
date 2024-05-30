@@ -60,7 +60,7 @@ def main():
     start_date = st.date_input("วันที่เริ่มลงทุน", value=date(2018, 1, 1), max_value=date.today() - timedelta(days=1))
 
     # Get stock data
-    end_date = date.today()
+    end_date = start_date + pd.DateOffset(months=duration_months)
     stock_data = yf.download(selected_ticker, start=start_date, end=end_date, progress=False)
 
     # Forward fill missing data to handle non-trading days
@@ -76,7 +76,7 @@ def main():
         else:
             initial_shares = lump_sum_amount / stock_data.iloc[0]["Adj Close"]
             final_portfolio_value = initial_shares * stock_data.iloc[-1]["Adj Close"]
-            fig = plot_returns_and_price(stock_data, lump_sum_amount, stock_data, investment_type)
+            fig = plot_returns_and_price_lump_sum(stock_data, lump_sum_amount, investment_type)
             display_summary(stock_data, lump_sum_amount, investment_type, final_portfolio_value)
 
 # Function to simulate DCA
@@ -98,21 +98,27 @@ def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
 
     return dca_data
 
-# Function to plot returns and stock price
-def plot_returns_and_price(data, initial_investment, stock_data, investment_type):
+# Function to plot returns and stock price for DCA
+def plot_returns_and_price(dca_data, total_invested, stock_data, investment_type):
     fig = go.Figure()
 
     if investment_type == "DCA":
-        fig.add_trace(go.Scatter(x=data["Date"], y=data["Portfolio Value"], mode="lines", name="มูลค่าของพอร์ต"))
-        fig.add_trace(go.Scatter(x=data["Date"], y=data["Total Invested"], mode="lines", name="จำนวนเงินลงทุน"))
+        fig.add_trace(go.Scatter(x=dca_data["Date"], y=dca_data["Portfolio Value"], mode="lines", name="มูลค่าของพอร์ต"))
+        fig.add_trace(go.Scatter(x=dca_data["Date"], y=dca_data["Total Invested"], mode="lines", name="จำนวนเงินลงทุน"))
         fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ DCA", xaxis_title="Date", yaxis_title="Value")
-    else:
-        initial_shares = initial_investment / stock_data.iloc[0]["Adj Close"]
-        portfolio_value = initial_shares * stock_data["Adj Close"]
-        dates = stock_data.index
-        fig.add_trace(go.Scatter(x=dates, y=portfolio_value, mode="lines", name="มูลค่าของพอร์ต"))
-        fig.add_trace(go.Scatter(x=dates, y=[initial_investment] * len(dates), mode="lines", name="จำนวนเงินลงทุน"))
-        fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ Lump Sum", xaxis_title="Date", yaxis_title="Value")
+    st.plotly_chart(fig)
+
+# Function to plot returns and stock price for Lump Sum
+def plot_returns_and_price_lump_sum(stock_data, initial_investment, investment_type):
+    fig = go.Figure()
+
+    initial_shares = initial_investment / stock_data.iloc[0]["Adj Close"]
+    portfolio_value = initial_shares * stock_data["Adj Close"]
+    dates = stock_data.index
+
+    fig.add_trace(go.Scatter(x=dates, y=portfolio_value, mode="lines", name="มูลค่าของพอร์ต"))
+    fig.add_trace(go.Scatter(x=dates, y=[initial_investment] * len(dates), mode="lines", name="จำนวนเงินลงทุน"))
+    fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ Lump Sum", xaxis_title="Date", yaxis_title="Value")
 
     st.plotly_chart(fig)
 
