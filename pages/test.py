@@ -88,13 +88,14 @@ def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
 
     for i in range(duration_months):
         date = start_date + pd.DateOffset(months=i)  # Calculate the monthly date
-        adjusted_date = stock_data.index.asof(date)  # Adjust to the closest trading day
-        price = stock_data.loc[adjusted_date, "Adj Close"]
+        if date not in stock_data.index:  # Check if the date is not a trading day
+            date = stock_data.index[stock_data.index.searchsorted(date)]  # Adjust to the closest trading day
+        price = stock_data.loc[date, "Adj Close"]
         shares_bought = monthly_amount / price
         shares += shares_bought
         total_invested += monthly_amount
         portfolio_value = shares * price
-        dca_data.loc[len(dca_data)] = [adjusted_date, shares, total_invested, portfolio_value]
+        dca_data.loc[len(dca_data)] = [date, shares, total_invested, portfolio_value]
 
     return dca_data
 
