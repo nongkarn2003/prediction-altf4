@@ -84,11 +84,12 @@ def simulate_dca(stock_data, monthly_amount, duration_months):
     shares = 0
 
     for i in range(duration_months):
-        date = stock_data.index[i * 21]  # Assuming monthly investment on the first trading day
+        date = stock_data.index[i]  # Assuming monthly investment on the first trading day
         price = stock_data.loc[date, "Adj Close"]
         shares_bought = monthly_amount / price
         shares += shares_bought
         total_invested += monthly_amount
+
         portfolio_value = shares * price
         dca_data.loc[i] = [date, shares, total_invested, portfolio_value]
 
