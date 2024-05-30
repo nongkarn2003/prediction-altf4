@@ -122,6 +122,19 @@ def plot_returns_and_price(data, initial_investment, stock_data, investment_type
 
     return fig
 
-# Function to display summary
 def display_summary(data, initial_investment, final_portfolio_value=None, investment_type="DCA"):
-    if investment_type == "D":
+    if investment_type == "DCA":
+        final_portfolio_value = data["Portfolio Value"].iloc[-1]
+        total_invested = data["Total Invested"].iloc[-1]
+        returns = (final_portfolio_value - total_invested) / total_invested * 100
+        st.write(f"**ภาพรวมของการลงทุนแบบ DCA**")
+        st.write(f"มูลค่าของพอร์ต: {final_portfolio_value:.2f}")
+        st.write(f"จำนวนเงินที่ลงทุน: {total_invested:.2f}")
+        st.write(f"ผลตอบแทน: {returns:.2f}%")
+    else:
+        final_portfolio_value = portfolio_value.iloc[-1]
+        returns = (final_portfolio_value - initial_investment) / initial_investment * 100
+        st.write(f"**ภาพรวมของการลงทุนแบบ Lump Sum**")
+        st.write(f"มูลค่าของพอร์ต: {final_portfolio_value:.2f}")
+        st.write(f"จำนวนเงินที่ลงทุน: {initial_investment:.2f}")
+        st.write(f"ผลตอบแทน: {returns:.2f}%")
