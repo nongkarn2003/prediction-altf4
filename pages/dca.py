@@ -36,28 +36,26 @@ css_string = """
 st.markdown(css_string, unsafe_allow_html=True)
 
 # List of stock tickers
-tickers = ["ADVANC.BK", "AOT.BK", "AWC.BK", "BANPU.BK", "BBL.BK", "BDMS.BK", "BEM.BK", "BGRIM.BK", "BH.BK", "BTS.BK", "CBG.BK", "CENTEL.BK", "COM7.BK", "CPALL.BK", "CPF.BK", "CPN.BK", "CRC.BK", "DELTA.BK", "EA.BK", "EGCO.BK", "GLOBAL.BK", "GPSC.BK", "GULF.BK", "HMPRO.BK", "INTUCH.BK", "IVL.BK", "KBANK.BK", "KCE.BK", "KTB.BK", "KTC.BK", "LH.BK", "MINT.BK", "MTC.BK", "OR.BK", "OSP.BK", "PTT.BK", "PTTEP.BK", "PTTGC.BK", "RATCH.BK", "SAWAD.BK", "SCB.BK", "SCC.BK", "SCGP.BK", "TISCO.BK", "TOP.BK", "TTB.BK", "TU.BK", "WHA.BK"]
+tickers = ["ADVANC.BK", "AOT.BK", "AWC.BK", "BANPU.BK", "BBL.BK", "BDMS.BK", "BEM.BK", "BGRIM.BK", "BH.BK", "BTS.BK", 
+           "CBG.BK", "CENTEL.BK", "COM7.BK", "CPALL.BK", "CPF.BK", "CPN.BK", "CRC.BK", "DELTA.BK", "EA.BK", "EGCO.BK", 
+           "GLOBAL.BK", "GPSC.BK", "GULF.BK", "HMPRO.BK", "INTUCH.BK", "IVL.BK", "KBANK.BK", "KCE.BK", "KTB.BK", "KTC.BK", 
+           "LH.BK", "MINT.BK", "MTC.BK", "OR.BK", "OSP.BK", "PTT.BK", "PTTEP.BK", "PTTGC.BK", "RATCH.BK", "SAWAD.BK", 
+           "SCB.BK", "SCC.BK", "SCGP.BK", "TISCO.BK", "TOP.BK", "TTB.BK", "TU.BK", "WHA.BK"]
 
 # Streamlit app
 def main():
-    st.title("DCA vs Lump Sum Investment")
-
-    # User input for investment type
-    investment_type = st.radio("เลือกวิธีการลงทุน", ["DCA", "Lump Sum"])
+    st.title("DCA vs Lump Sum Investment Comparison")
 
     # User input for stock ticker
     selected_ticker = st.selectbox("เลือกหุ้น", tickers)
 
-    # User input for investment amount and duration
-    if investment_type == "DCA":
-        monthly_amount = st.number_input("จำนวนเงินลงทุนต่อเดือน", min_value=0.0, step=1.0)
-        duration_months = st.number_input("ระยะเวลาการลงทุน (เดือน)", min_value=1, step=1)
-    else:
-        lump_sum_amount = st.number_input("จำนวนเงินลงทุน", min_value=0.0, step=1.0)
-        duration_months = st.number_input("ระยะเวลาการลงทุน (เดือน)", min_value=1, step=1)
-
-    # User input for start date
+    # User input for investment duration and amount
+    duration_months = st.number_input("ระยะเวลาการลงทุน (เดือน)", min_value=1, step=1)
     start_date = st.date_input("วันที่เริ่มลงทุน", value=date(2018, 1, 1), max_value=date.today() - timedelta(days=1))
+
+    # User input for investment amounts (input both to avoid confusion)
+    monthly_amount = st.number_input("จำนวนเงินลงทุนต่อเดือน (DCA)", min_value=0.0, step=1.0)
+    lump_sum_amount = st.number_input("จำนวนเงินลงทุนครั้งเดียว (Lump Sum)", min_value=0.0, step=1.0)
 
     # Get stock data
     end_date = start_date + pd.DateOffset(months=duration_months)
@@ -66,18 +64,24 @@ def main():
     # Forward fill missing data to handle non-trading days
     stock_data = stock_data.ffill()
 
-    # Calculate returns and plot
+    # Calculate returns and plot both methods
     if st.button("คำนวณ"):
-        if investment_type == "DCA":
-            total_invested = monthly_amount * duration_months
-            dca_data = simulate_dca(stock_data, monthly_amount, duration_months, start_date)
-            fig = plot_returns_and_price(dca_data, total_invested, stock_data, investment_type)
-            display_summary(dca_data, total_invested, investment_type)
-        else:
-            initial_shares = lump_sum_amount / stock_data.iloc[0]["Adj Close"]
-            final_portfolio_value = initial_shares * stock_data.iloc[-1]["Adj Close"]
-            fig = plot_returns_and_price_lump_sum(stock_data, lump_sum_amount, investment_type)
-            display_summary(stock_data, lump_sum_amount, investment_type, final_portfolio_value)
+        # Simulate DCA
+        total_dca_invested = monthly_amount * duration_months
+        dca_data = simulate_dca(stock_data, monthly_amount, duration_months, start_date)
+        dca_final_portfolio_value = dca_data["Portfolio Value"].iloc[-1]
+
+        # Simulate Lump Sum
+        initial_shares = lump_sum_amount / stock_data.iloc[0]["Adj Close"]
+        final_portfolio_value_lump_sum = initial_shares * stock_data.iloc[-1]["Adj Close"]
+
+        # Plot the comparison graph
+        fig = plot_comparison(dca_data, total_dca_invested, stock_data, lump_sum_amount, final_portfolio_value_lump_sum)
+        st.plotly_chart(fig)
+
+        # Display summary for both
+        display_summary(dca_data, total_dca_invested, "DCA", dca_final_portfolio_value)
+        display_summary(stock_data, lump_sum_amount, "Lump Sum", final_portfolio_value_lump_sum)
 
 # Function to simulate DCA
 def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
@@ -99,34 +103,28 @@ def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
 
     return dca_data
 
-# Function to plot returns and stock price for DCA
-def plot_returns_and_price(dca_data, total_invested, stock_data, investment_type):
+# Function to plot comparison between DCA and Lump Sum
+def plot_comparison(dca_data, total_dca_invested, stock_data, lump_sum_investment, lump_sum_final_value):
     fig = go.Figure()
 
-    if investment_type == "DCA":
-        fig.add_trace(go.Scatter(x=dca_data["Date"], y=dca_data["Portfolio Value"], mode="lines", name="มูลค่าของพอร์ต"))
-        fig.add_trace(go.Scatter(x=dca_data["Date"], y=dca_data["Total Invested"], mode="lines", name="จำนวนเงินลงทุน"))
-        fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ DCA", xaxis_title="Date", yaxis_title="Value")
-    st.plotly_chart(fig)
+    # Plot DCA
+    fig.add_trace(go.Scatter(x=dca_data["Date"], y=dca_data["Portfolio Value"], mode="lines", name="มูลค่าของพอร์ต DCA"))
+    fig.add_trace(go.Scatter(x=dca_data["Date"], y=dca_data["Total Invested"], mode="lines", name="จำนวนเงินลงทุน DCA"))
 
-# Function to plot returns and stock price for Lump Sum
-def plot_returns_and_price_lump_sum(stock_data, initial_investment, investment_type):
-    fig = go.Figure()
-
-    initial_shares = initial_investment / stock_data.iloc[0]["Adj Close"]
-    portfolio_value = initial_shares * stock_data["Adj Close"]
+    # Plot Lump Sum
+    initial_shares = lump_sum_investment / stock_data.iloc[0]["Adj Close"]
+    portfolio_value_lump_sum = initial_shares * stock_data["Adj Close"]
     dates = stock_data.index
+    fig.add_trace(go.Scatter(x=dates, y=portfolio_value_lump_sum, mode="lines", name="มูลค่าของพอร์ต Lump Sum"))
+    fig.add_trace(go.Scatter(x=dates, y=[lump_sum_investment] * len(dates), mode="lines", name="จำนวนเงินลงทุน Lump Sum"))
 
-    fig.add_trace(go.Scatter(x=dates, y=portfolio_value, mode="lines", name="มูลค่าของพอร์ต"))
-    fig.add_trace(go.Scatter(x=dates, y=[initial_investment] * len(dates), mode="lines", name="จำนวนเงินลงทุน"))
-    fig.update_layout(title="ผลตอบแทนของการลงทุนแบบ Lump Sum", xaxis_title="Date", yaxis_title="Value")
-
-    st.plotly_chart(fig)
+    fig.update_layout(title="เปรียบเทียบผลตอบแทน DCA vs Lump Sum", xaxis_title="Date", yaxis_title="Value")
+    
+    return fig
 
 # Function to display summary
 def display_summary(data, initial_investment, investment_type, final_portfolio_value=None):
     if investment_type == "DCA":
-        final_portfolio_value = data["Portfolio Value"].iloc[-1]
         total_invested = data["Total Invested"].iloc[-1]
         returns = (final_portfolio_value - total_invested) / total_invested * 100
         st.write(f"**ภาพรวมของการลงทุนแบบ DCA**")
