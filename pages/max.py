@@ -1,104 +1,42 @@
 import streamlit as st
-from datetime import date
 import yfinance as yf
 import pandas as pd
-import plotly.express as px
+import plotly.graph_objects as go
 
-streamlit_style = """
-<style>
-@import url(https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&display=swap);
+st.title("Max Drawdown ของหุ้น")
 
-* {
-    font-family: 'Mitr', sans-serif;
-}
-.st-emotion-cache-1dp5vir {   
-background-image: linear-gradient(90deg, rgb(0 0 0), rgb(0 0 0));
-}
-</style>
-"""
+# เลือกหุ้น
+stocks = ('^SET.BK', 'ADVANC.BK', 'AOT.BK', 'AWC.BK', 'BANPU.BK', 'BBL.BK', 'BDMS.BK', 'BEM.BK', 'BGRIM.BK', 'BH.BK', 'BTS.BK', 'CBG.BK', 'CENTEL.BK', 'COM7.BK', 'CPALL.BK', 'CPF.BK', 'CPN.BK', 'CRC.BK', 'DELTA.BK', 'EA.BK', 'EGCO.BK', 'GLOBAL.BK', 'GPSC.BK', 'GULF.BK', 'HMPRO.BK', 'INTUCH.BK', 'IVL.BK', 'KBANK.BK', 'KCE.BK', 'KTB.BK', 'KTC.BK', 'LH.BK', 'MINT.BK', 'MTC.BK', 'OR.BK', 'OSP.BK', 'PTT.BK', 'PTTEP.BK', 'PTTGC.BK', 'RATCH.BK', 'SAWAD.BK', 'SCB.BK', 'SCC.BK', 'SCGP.BK', 'TISCO.BK', 'TLI.BK', 'TOP.BK', 'TRUE.BK', 'TTB.BK', 'TU.BK', 'WHA.BK')
 
-st.markdown(streamlit_style, unsafe_allow_html=True)
+dropdown = st.selectbox('เลือกหุ้นที่ต้องการแสดง Max Drawdown', options=stocks)
 
-css_string = """
-<style>
-.st-emotion-cache-1dp5vir {
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    left: 0px;
-    height: 0.125rem;
-    z-index: 999990;
-}
-</style>
-"""
-
-# Render the CSS styles in your Streamlit app
-st.markdown(css_string, unsafe_allow_html=True)
-
-st.title("เปรียบเทียบหุ้น")
-
-stocks = ('^SET.BK','ADVANC.BK', 'AOT.BK', 'AWC.BK', 'BANPU.BK', 'BBL.BK', 'BDMS.BK', 'BEM.BK', 'BGRIM.BK', 'BH.BK', 'BTS.BK', 'CBG.BK', 'CENTEL.BK', 'COM7.BK', 'CPALL.BK', 'CPF.BK', 'CPN.BK', 'CRC.BK', 'DELTA.BK', 'EA.BK', 'EGCO.BK', 'GLOBAL.BK', 'GPSC.BK', 'GULF.BK', 'HMPRO.BK', 'INTUCH.BK', 'IVL.BK', 'KBANK.BK', 'KCE.BK', 'KTB.BK', 'KTC.BK', 'LH.BK', 'MINT.BK', 'MTC.BK', 'OR.BK', 'OSP.BK', 'PTT.BK', 'PTTEP.BK', 'PTTGC.BK', 'RATCH.BK', 'SAWAD.BK', 'SCB.BK', 'SCC.BK', 'SCGP.BK', 'TISCO.BK', 'TLI.BK', 'TOP.BK', 'TRUE.BK', 'TTB.BK', 'TU.BK', 'WHA.BK')
-
-dropdown = st.multiselect('เลือกหุ้นที่ต้องการเปรียบเทียบ', options=stocks)
-
+# เลือกช่วงเวลาย้อนหลัง
 start = st.date_input('วันที่เริ่ม', value=pd.to_datetime('2019-01-01'))
 end = st.date_input('วันที่ล่าสุด', value=pd.to_datetime('today'))
 
-def relativereturn(df):
-    rel = df.pct_change()
-    cumret = (1 + rel).cumprod() - 1
-    cumret = cumret.fillna(0)
-    return cumret
-
 def calculate_max_drawdown(df):
+    """
+    คำนวณ Max Drawdown จากข้อมูลราคา
+    """
     peak = df.cummax()
     drawdown = (df - peak) / peak
-    max_drawdown = drawdown.min()
-    return max_drawdown * 100  # Convert to percentage
+    max_drawdown = drawdown.min()  # หา drawdown ต่ำสุด
+    return max_drawdown * 100, drawdown  # Return both the percentage and the series
 
-if len(dropdown) > 0:
-    df = relativereturn(yf.download(dropdown, start, end, progress=False)['Adj Close'])
-    st.line_chart(df)
-
+# ดึงข้อมูลราคาหุ้นย้อนหลัง
+if dropdown:
+    stock_data = yf.download(dropdown, start=start, end=end, progress=False)['Adj Close']
+    
     # คำนวณ Max Drawdown
-    max_drawdowns = {}
-    for stock in dropdown:
-        stock_data = yf.download(stock, start=start, end=end, progress=False)['Adj Close']
-        max_drawdown = calculate_max_drawdown(stock_data)
-        max_drawdowns[stock] = max_drawdown
-
+    max_drawdown, drawdown_series = calculate_max_drawdown(stock_data)
+    
     # แสดงผล Max Drawdown
-    st.header('Max Drawdown ของหุ้นแต่ละตัว')
-    for stock, mdd in max_drawdowns.items():
-        st.write(f"{stock}: {round(mdd, 2)}%")
-
-def get_financial_ratios(tickers):
-    ratios = {}
-    for ticker in tickers:
-        try:
-            stock_info = yf.Ticker(ticker).info
-            ratios[ticker] = {
-                'Price/Book': stock_info.get('priceToBook', 'N/A'),
-                'Price/Earnings': stock_info.get('trailingPE', 'N/A'),
-                'Price/Sales': stock_info.get('priceToSalesTrailingTwelveMonths', 'N/A'),
-                'Price/Cash Flow': stock_info.get('priceToOperatingCashFlowsTrailingTwelveMonths', 'N/A'),
-                'Debt/Equity': stock_info.get('debtToEquity', 'N/A'),
-                'Return on Equity': stock_info.get('returnOnEquity', 'N/A'),
-                'Return on Assets': stock_info.get('returnOnAssets', 'N/A'),
-                'Operating Margin': stock_info.get('operatingMargin', 'N/A'),
-                'Profit Margin': stock_info.get('profitMargins', 'N/A'),
-                'Current Ratio': stock_info.get('currentRatio', 'N/A'),
-                'Quick Ratio': stock_info.get('quickRatio', 'N/A'),
-            }
-        except:
-            pass
-    return pd.DataFrame.from_dict(ratios, orient='index')
-
-if len(dropdown) > 0:
-    ratios_df = get_financial_ratios(dropdown)
-    if not ratios_df.empty:
-        st.header('สัดส่วนการเงิน')
-        ratio_col = st.selectbox('เลือกสัดส่วนการเงิน', list(ratios_df.columns))
-        if ratio_col:
-            fig = px.bar(ratios_df[[ratio_col]], x=ratios_df.index, y=ratio_col, barmode='group', title=ratio_col)
-            st.plotly_chart(fig)
+    st.write(f"Max Drawdown ของ {dropdown}: {round(max_drawdown, 2)}%")
+    
+    # สร้างกราฟการเปลี่ยนแปลงของ Drawdown
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=stock_data.index, y=drawdown_series * 100, mode='lines', name='Drawdown (%)'))
+    fig.update_layout(title=f"Drawdown ของ {dropdown} ย้อนหลัง", xaxis_title="Date", yaxis_title="Drawdown (%)")
+    
+    # แสดงกราฟ
+    st.plotly_chart(fig)
