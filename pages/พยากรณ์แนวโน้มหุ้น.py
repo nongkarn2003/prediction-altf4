@@ -6,6 +6,7 @@ from prophet.plot import plot_plotly
 import plotly.graph_objs as go
 import streamlit.components.v1 as components
 import numpy as np
+import pandas as pd
 
 streamlit_style = """
 <style>
@@ -56,8 +57,12 @@ def plot_raw_data():
 
 plot_raw_data()
 
-df_train = data[['Date', 'Close']]
-df_train = df_train.rename(columns={"Date": "ds", "Close": "y"})
+# Convert data to proper format for Prophet
+df_train = pd.DataFrame({
+    'ds': data['Date'],
+    'y': data['Close'].astype(float)
+})
+
 m = Prophet()
 m.fit(df_train)
 future = m.make_future_dataframe(periods=period)
@@ -72,8 +77,10 @@ components.html(fig1.to_html(full_html=False), height=600)
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
 
-actual_values = df_train['y'].values[-period:]
-forecast_values = forecast['yhat'].values[-period:]
+# Calculate metrics using available data
+available_period = min(period, len(df_train))
+actual_values = df_train['y'].values[-available_period:]
+forecast_values = forecast['yhat'].values[-available_period:]
 
 mae = np.mean(np.abs(actual_values - forecast_values))
 st.write("Mean Absolute Error (MAE):", mae)
