@@ -32,22 +32,27 @@ ng_pe = st.text_input('PE ที่ไม่มีการเติบโต', 
 multiplier = st.text_input('ระยะการเติบโต', "2")
 margin = st.text_input('ส่วนเผื่อราคา (%)', "35")
 
-# ดึงข้อมูลหุ้น
 def get_data(ticker):
     try:
         ticker_data = yf.Ticker(ticker)
-        df = ticker_data.history(period="5y")
+        df = ticker_data.history(period="5y")  # ดึงข้อมูลย้อนหลัง 5 ปี
+        if 'Adj Close' in df.columns:
+            df['Price'] = df['Adj Close']
+        elif 'Close' in df.columns:
+            df['Price'] = df['Close']
+        else:
+            st.warning("ไม่มีข้อมูลราคา ('Adj Close' หรือ 'Close') สำหรับหุ้นนี้")
+            return pd.DataFrame()  # คืนค่า DataFrame ว่าง
         return df
     except Exception as e:
         st.error(f"ไม่สามารถดึงข้อมูลหุ้นได้: {e}")
         return pd.DataFrame()
-
 # คำนวณ Max Drawdown
 def calculate_max_drawdown(df):
     if df.empty:
         return None
-    peak = df['Close'].cummax()
-    drawdown = (df['Close'] - peak) / peak
+    peak = df['Price'].cummax()
+    drawdown = (df['Price'] - peak) / peak
     return drawdown.min() * 100
 
 # ดึงข้อมูลหุ้นและดัชนี AAA
@@ -77,7 +82,7 @@ def get_stock_info(ticker, ng_pe, multiplier, margin):
 if st.button('คํานวณ'):
     df = get_data(ticker)
     if df.empty:
-        st.error("ไม่มีข้อมูลสำหรับหุ้นที่เลือก")
+    st.error("ไม่สามารถดึงข้อมูลสำหรับหุ้นที่เลือกได้")
     else:
         data = get_stock_info(ticker, ng_pe, multiplier, margin)
         if data:
