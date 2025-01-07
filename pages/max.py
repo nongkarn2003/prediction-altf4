@@ -82,7 +82,7 @@ def get_stock_info(ticker, ng_pe, multiplier, margin):
 if st.button('คํานวณ'):
     df = get_data(ticker)
     if df.empty:
-    st.error("ไม่สามารถดึงข้อมูลสำหรับหุ้นที่เลือกได้")
+        st.error("ไม่สามารถดึงข้อมูลสำหรับหุ้นที่เลือกได้")
     else:
         data = get_stock_info(ticker, ng_pe, multiplier, margin)
         if data:
