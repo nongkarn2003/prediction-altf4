@@ -1,9 +1,10 @@
 import streamlit as st
 from datetime import date
-import yfinance as yf 
+import yfinance as yf
 from prophet import Prophet
 from prophet.plot import plot_plotly
 import plotly.graph_objs as go
+import streamlit.components.v1 as components
 import numpy as np
 
 streamlit_style = """
@@ -13,7 +14,7 @@ streamlit_style = """
     font-family: 'Mitr', sans-serif;
 }
 .st-emotion-cache-1dp5vir {   
-background-image: linear-gradient(90deg, rgb(0 0 0), rgb(0 0 0));
+    background-image: linear-gradient(90deg, rgb(0 0 0), rgb(0 0 0));
 }
 </style>
 """
@@ -23,7 +24,15 @@ START = "2019-01-01"
 TODAY = date.today().strftime("%Y-%m-%d")
 
 st.title("พยากรณ์แนวโน้มหุ้น")
-stocks = ('ADVANC.BK', 'AOT.BK', 'AWC.BK', 'BANPU.BK', 'BBL.BK', 'BDMS.BK', 'BEM.BK', 'BGRIM.BK', 'BH.BK', 'BTS.BK', 'CBG.BK', 'CENTEL.BK', 'COM7.BK', 'CPALL.BK', 'CPF.BK', 'CPN.BK', 'CRC.BK', 'DELTA.BK', 'EA.BK', 'EGCO.BK', 'GLOBAL.BK', 'GPSC.BK', 'GULF.BK', 'HMPRO.BK', 'INTUCH.BK', 'IVL.BK', 'KBANK.BK', 'KCE.BK', 'KTB.BK', 'KTC.BK', 'LH.BK', 'MINT.BK', 'MTC.BK', 'OR.BK', 'OSP.BK', 'PTT.BK', 'PTTEP.BK', 'PTTGC.BK', 'RATCH.BK', 'SAWAD.BK', 'SCB.BK', 'SCC.BK', 'SCGP.BK', 'TISCO.BK', 'TLI.BK', 'TOP.BK', 'TRUE.BK', 'TTB.BK', 'TU.BK', 'WHA.BK')
+
+stocks = ('ADVANC.BK', 'AOT.BK', 'AWC.BK', 'BANPU.BK', 'BBL.BK', 'BDMS.BK', 'BEM.BK', 
+         'BGRIM.BK', 'BH.BK', 'BTS.BK', 'CBG.BK', 'CENTEL.BK', 'COM7.BK', 'CPALL.BK', 
+         'CPF.BK', 'CPN.BK', 'CRC.BK', 'DELTA.BK', 'EA.BK', 'EGCO.BK', 'GLOBAL.BK', 
+         'GPSC.BK', 'GULF.BK', 'HMPRO.BK', 'INTUCH.BK', 'IVL.BK', 'KBANK.BK', 'KCE.BK', 
+         'KTB.BK', 'KTC.BK', 'LH.BK', 'MINT.BK', 'MTC.BK', 'OR.BK', 'OSP.BK', 'PTT.BK', 
+         'PTTEP.BK', 'PTTGC.BK', 'RATCH.BK', 'SAWAD.BK', 'SCB.BK', 'SCC.BK', 'SCGP.BK', 
+         'TISCO.BK', 'TLI.BK', 'TOP.BK', 'TRUE.BK', 'TTB.BK', 'TU.BK', 'WHA.BK')
+
 selected_stocks = st.selectbox("เลือกหุ้น", stocks)
 n_years = st.slider("จํานวนปีที่ต้องการพยากรณ์", 1, 4)
 period = n_years * 365
@@ -47,10 +56,8 @@ def plot_raw_data():
 
 plot_raw_data()
 
-# Forecasting
 df_train = data[['Date', 'Close']]
 df_train = df_train.rename(columns={"Date": "ds", "Close": "y"})
-
 m = Prophet()
 m.fit(df_train)
 future = m.make_future_dataframe(periods=period)
@@ -59,15 +66,12 @@ forecast = m.predict(future)
 st.subheader('ข้อมูลการพยากรณ์')
 st.write(forecast.tail())
 
-st.subheader('กราฟพยากรณ์')
 fig1 = plot_plotly(m, forecast)
-st.plotly_chart(fig1)
+components.html(fig1.to_html(full_html=False), height=600)
 
-st.subheader('องค์ประกอบการพยากรณ์')
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
 
-# Calculate metrics
 actual_values = df_train['y'].values[-period:]
 forecast_values = forecast['yhat'].values[-period:]
 
