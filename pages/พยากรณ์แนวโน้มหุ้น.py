@@ -57,11 +57,10 @@ def plot_raw_data():
 
 plot_raw_data()
 
-# Convert data to proper format for Prophet
-df_train = pd.DataFrame({
-    'ds': data['Date'],
-    'y': data['Close'].astype(float)
-})
+# Prepare data for Prophet
+df_train = data[['Date', 'Close']].copy()
+df_train.columns = ['ds', 'y']
+df_train['y'] = df_train['y'].values.astype(float)
 
 m = Prophet()
 m.fit(df_train)
@@ -77,7 +76,7 @@ components.html(fig1.to_html(full_html=False), height=600)
 fig2 = m.plot_components(forecast)
 st.pyplot(fig2)
 
-# Calculate metrics using available data
+# Calculate metrics
 available_period = min(period, len(df_train))
 actual_values = df_train['y'].values[-available_period:]
 forecast_values = forecast['yhat'].values[-available_period:]
