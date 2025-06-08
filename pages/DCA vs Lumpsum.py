@@ -121,8 +121,8 @@ def get_stock_data(ticker, start_date, end_date):
             else:
                 return pd.DataFrame(), "ไม่พบข้อมูลราคา"
             
-            # เติมข้อมูลที่หายไป
-            stock_data = stock_data.fillna(method='ffill').fillna(method='bfill')
+            # เติมข้อมูลที่หายไป - ใช้วิธีใหม่
+            stock_data = stock_data.ffill().bfill()
             
             # คำนวณผลตอบแทน
             stock_data['Daily_Return'] = stock_data['Price'].pct_change()
@@ -140,16 +140,36 @@ def calculate_metrics(returns_series):
     
     returns_series = returns_series.dropna()
     
+    if len(returns_series) < 2:
+        return {
+            'total_return': 0,
+            'annualized_return': 0,
+            'volatility': 0,
+            'sharpe_ratio': 0,
+            'max_drawdown': 0
+        }
+    
+    daily_returns = returns_series.pct_change().dropna()
+    
+    total_return = (returns_series.iloc[-1] / returns_series.iloc[0] - 1) * 100 if returns_series.iloc[0] != 0 else 0
+    annualized_return = ((returns_series.iloc[-1] / returns_series.iloc[0]) ** (252 / len(returns_series)) - 1) * 100 if len(returns_series) > 0 and returns_series.iloc[0] != 0 else 0
+    volatility = daily_returns.std() * np.sqrt(252) * 100 if len(daily_returns) > 0 else 0
+    sharpe_ratio = (daily_returns.mean() * 252) / (daily_returns.std() * np.sqrt(252)) if daily_returns.std() > 0 else 0
+    max_drawdown = calculate_max_drawdown(returns_series)
+    
     return {
-        'total_return': (returns_series.iloc[-1] / returns_series.iloc[0] - 1) * 100,
-        'annualized_return': ((returns_series.iloc[-1] / returns_series.iloc[0]) ** (252 / len(returns_series)) - 1) * 100,
-        'volatility': returns_series.pct_change().std() * np.sqrt(252) * 100,
-        'sharpe_ratio': (returns_series.pct_change().mean() * 252) / (returns_series.pct_change().std() * np.sqrt(252)),
-        'max_drawdown': calculate_max_drawdown(returns_series)
+        'total_return': total_return,
+        'annualized_return': annualized_return,
+        'volatility': volatility,
+        'sharpe_ratio': sharpe_ratio,
+        'max_drawdown': max_drawdown
     }
 
 def calculate_max_drawdown(price_series):
     """คำนวณ Maximum Drawdown"""
+    if len(price_series) == 0:
+        return 0
+    
     peak = price_series.expanding().max()
     drawdown = (price_series - peak) / peak * 100
     return drawdown.min()
@@ -171,6 +191,9 @@ def simulate_dca_advanced(stock_data, monthly_amount, duration_months, start_dat
             
         actual_date = available_dates[0]
         price = stock_data.loc[actual_date, 'Price']
+        
+        if price <= 0 or pd.isna(price):
+            continue
         
         # คำนวณการซื้อ
         shares_bought = monthly_amount / price
@@ -205,6 +228,10 @@ def simulate_lump_sum_advanced(stock_data, lump_sum_amount, start_date):
     
     actual_start_date = available_dates[0]
     initial_price = stock_data.loc[actual_start_date, 'Price']
+    
+    if initial_price <= 0 or pd.isna(initial_price):
+        return pd.DataFrame()
+    
     shares = lump_sum_amount / initial_price
     
     # คำนวณมูลค่าพอร์ตตลอดระยะเวลา
@@ -217,12 +244,12 @@ def simulate_lump_sum_advanced(stock_data, lump_sum_amount, start_date):
     
     return portfolio_data
 
-def create_comparison_chart(dca_data, lump_sum_data, investment_type_comparison=True):
+def create_comparison_chart(dca_data, lump_sum_data):
     """สร้างกราฟเปรียบเทียบ DCA vs Lump Sum"""
     fig = make_subplots(
         rows=2, cols=2,
         subplot_titles=('Portfolio Value Comparison', 'Return Comparison', 
-                       'Investment vs Portfolio Value', 'Risk Analysis'),
+                       'Investment vs Portfolio Value', 'Cumulative Investment'),
         specs=[[{"secondary_y": False}, {"secondary_y": False}],
                [{"secondary_y": True}, {"secondary_y": False}]]
     )
@@ -263,6 +290,18 @@ def create_comparison_chart(dca_data, lump_sum_data, investment_type_comparison=
                       name='Portfolio Value (DCA)', line=dict(color='#fcb69f')),
             row=2, col=1
         )
+        
+        # Cumulative Investment comparison
+        fig.add_trace(
+            go.Scatter(x=dca_data['Date'], y=dca_data['Total_Invested'], 
+                      name='DCA Cumulative', line=dict(color='#667eea')),
+            row=2, col=2
+        )
+        fig.add_trace(
+            go.Scatter(x=lump_sum_data.index, y=[lump_sum_data['Total_Invested'].iloc[0]] * len(lump_sum_data), 
+                      name='Lump Sum Total', line=dict(color='#764ba2')),
+            row=2, col=2
+        )
     
     fig.update_layout(
         height=800,
@@ -295,6 +334,44 @@ def create_advanced_metrics_table(dca_metrics, lump_sum_metrics):
     }
     
     return pd.DataFrame(comparison_data)
+
+def calculate_win_rate(stock_data, monthly_amount, lump_sum_amount, duration_months, num_simulations=100):
+    """คำนวณอัตราชนะของ DCA vs Lump Sum โดยการจำลองหลายครั้ง"""
+    if len(stock_data) < duration_months:
+        return 0, []
+    
+    dca_wins = 0
+    results = []
+    
+    for i in range(num_simulations):
+        # สุ่มจุดเริ่มต้น
+        max_start = len(stock_data) - duration_months
+        if max_start <= 0:
+            continue
+            
+        start_idx = np.random.randint(0, max_start)
+        start_date = stock_data.index[start_idx]
+        
+        # จำลอง DCA และ Lump Sum
+        dca_sim = simulate_dca_advanced(stock_data, monthly_amount, duration_months, start_date)
+        ls_sim = simulate_lump_sum_advanced(stock_data, lump_sum_amount, start_date)
+        
+        if not dca_sim.empty and not ls_sim.empty:
+            dca_return = dca_sim['Return_Pct'].iloc[-1]
+            ls_return = ls_sim['Return_Pct'].iloc[-1]
+            
+            if dca_return > ls_return:
+                dca_wins += 1
+            
+            results.append({
+                'simulation': i+1,
+                'dca_return': dca_return,
+                'ls_return': ls_return,
+                'dca_wins': dca_return > ls_return
+            })
+    
+    win_rate = (dca_wins / len(results)) * 100 if results else 0
+    return win_rate, results
 
 # ===== MAIN APPLICATION =====
 def main():
@@ -339,7 +416,12 @@ def main():
                                      max_value=date.today() - timedelta(days=30))
         with col4:
             analysis_type = st.selectbox("ประเภทการวิเคราะห์", 
-                                       ["เปรียบเทียบ", "DCA เท่านั้น", "Lump Sum เท่านั้น"])
+                                       ["เปรียบเทียบ", "DCA เท่านั้น", "Lump Sum เท่านั้น", "Monte Carlo"])
+        
+        # Advanced Options
+        st.subheader("🎯 ตัวเลือกขั้นสูง")
+        show_detailed_table = st.checkbox("แสดงตารางรายละเอียด", False)
+        monte_carlo_sims = st.slider("จำนวนการจำลอง Monte Carlo", 50, 500, 100)
     
     # Main Content
     end_date = start_date + timedelta(days=duration_months * 30)
@@ -368,7 +450,8 @@ def main():
         st.metric("การเปลี่ยนแปลง", f"{price_change:+.2f}%", 
                  delta=f"{price_change:+.2f}%")
     with col3:
-        volatility = stock_data['Daily_Return'].std() * np.sqrt(252) * 100
+        daily_returns = stock_data['Daily_Return'].dropna()
+        volatility = daily_returns.std() * np.sqrt(252) * 100 if len(daily_returns) > 0 else 0
         st.metric("ความผันผวน (ปี)", f"{volatility:.2f}%")
     with col4:
         max_dd = calculate_max_drawdown(stock_data['Price'])
@@ -392,46 +475,46 @@ def main():
                 with col1:
                     dca_final_value = dca_data['Portfolio_Value'].iloc[-1]
                     dca_total_invested = dca_data['Total_Invested'].iloc[-1]
-                    dca_return = ((dca_final_value - dca_total_invested) / dca_total_invested) * 100
+                    dca_return = ((dca_final_value - dca_total_invested) / dca_total_invested) * 100 if dca_total_invested > 0 else 0
                     
-                    st.markdown(f"""
+                    st.markdown("""
                     <div class="metric-card">
                         <h3>💰 DCA Strategy</h3>
-                        <p><strong>มูลค่าพอร์ต:</strong> ฿{dca_final_value:,.2f}</p>
-                        <p><strong>เงินลงทุน:</strong> ฿{dca_total_invested:,.2f}</p>
-                        <p><strong>ผลตอบแทน:</strong> {dca_return:+.2f}%</p>
+                        <p><strong>มูลค่าพอร์ต:</strong> ฿{:,.2f}</p>
+                        <p><strong>เงินลงทุน:</strong> ฿{:,.2f}</p>
+                        <p><strong>ผลตอบแทน:</strong> {:+.2f}%</p>
                     </div>
-                    """, unsafe_allow_html=True)
+                    """.format(dca_final_value, dca_total_invested, dca_return), unsafe_allow_html=True)
                 
                 with col2:
                     ls_final_value = lump_sum_data['Portfolio_Value'].iloc[-1]
                     ls_total_invested = lump_sum_amount
-                    ls_return = ((ls_final_value - ls_total_invested) / ls_total_invested) * 100
+                    ls_return = ((ls_final_value - ls_total_invested) / ls_total_invested) * 100 if ls_total_invested > 0 else 0
                     
-                    st.markdown(f"""
+                    st.markdown("""
                     <div class="metric-card">
                         <h3>📈 Lump Sum Strategy</h3>
-                        <p><strong>มูลค่าพอร์ต:</strong> ฿{ls_final_value:,.2f}</p>
-                        <p><strong>เงินลงทุน:</strong> ฿{ls_total_invested:,.2f}</p>
-                        <p><strong>ผลตอบแทน:</strong> {ls_return:+.2f}%</p>
+                        <p><strong>มูลค่าพอร์ต:</strong> ฿{:,.2f}</p>
+                        <p><strong>เงินลงทุน:</strong> ฿{:,.2f}</p>
+                        <p><strong>ผลตอบแทน:</strong> {:+.2f}%</p>
                     </div>
-                    """, unsafe_allow_html=True)
+                    """.format(ls_final_value, ls_total_invested, ls_return), unsafe_allow_html=True)
                 
                 # Winner Declaration
                 if dca_return > ls_return:
-                    st.markdown(f"""
+                    st.markdown("""
                     <div class="success-card">
                         <h3>🏆 DCA ชนะ!</h3>
-                        <p>DCA ให้ผลตอบแทนสูงกว่า {dca_return - ls_return:.2f}%</p>
+                        <p>DCA ให้ผลตอบแทนสูงกว่า {:.2f}%</p>
                     </div>
-                    """, unsafe_allow_html=True)
+                    """.format(dca_return - ls_return), unsafe_allow_html=True)
                 else:
-                    st.markdown(f"""
+                    st.markdown("""
                     <div class="warning-card">
                         <h3>🏆 Lump Sum ชนะ!</h3>
-                        <p>Lump Sum ให้ผลตอบแทนสูงกว่า {ls_return - dca_return:.2f}%</p>
+                        <p>Lump Sum ให้ผลตอบแทนสูงกว่า {:.2f}%</p>
                     </div>
-                    """, unsafe_allow_html=True)
+                    """.format(ls_return - dca_return), unsafe_allow_html=True)
                 
                 # Advanced Charts
                 fig = create_comparison_chart(dca_data, lump_sum_data)
@@ -445,13 +528,24 @@ def main():
                 metrics_df = create_advanced_metrics_table(dca_metrics, ls_metrics)
                 st.dataframe(metrics_df, use_container_width=True)
                 
+                # Detailed Tables
+                if show_detailed_table:
+                    st.markdown("### 📊 ข้อมูลรายละเอียด")
+                    tab1, tab2 = st.tabs(["DCA Data", "Lump Sum Data"])
+                    
+                    with tab1:
+                        st.dataframe(dca_data, use_container_width=True)
+                    
+                    with tab2:
+                        st.dataframe(lump_sum_data, use_container_width=True)
+                
             elif analysis_type == "DCA เท่านั้น" and not dca_data.empty:
                 # DCA Only Analysis
                 st.markdown("## 💰 การวิเคราะห์ DCA")
                 
                 dca_final_value = dca_data['Portfolio_Value'].iloc[-1]
                 dca_total_invested = dca_data['Total_Invested'].iloc[-1]
-                dca_return = ((dca_final_value - dca_total_invested) / dca_total_invested) * 100
+                dca_return = ((dca_final_value - dca_total_invested) / dca_total_invested) * 100 if dca_total_invested > 0 else 0
                 
                 col1, col2, col3 = st.columns(3)
                 with col1:
@@ -470,52 +564,5 @@ def main():
                 fig.update_layout(title="DCA Investment Progress", height=500)
                 st.plotly_chart(fig, use_container_width=True)
                 
-            elif analysis_type == "Lump Sum เท่านั้น" and not lump_sum_data.empty:
-                # Lump Sum Only Analysis
-                st.markdown("## 📈 การวิเคราะห์ Lump Sum")
-                
-                ls_final_value = lump_sum_data['Portfolio_Value'].iloc[-1]
-                ls_return = ((ls_final_value - lump_sum_amount) / lump_sum_amount) * 100
-                
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.metric("มูลค่าพอร์ต", f"฿{ls_final_value:,.2f}")
-                with col2:
-                    st.metric("เงินลงทุน", f"฿{lump_sum_amount:,.2f}")
-                with col3:
-                    st.metric("ผลตอบแทน", f"{ls_return:+.2f}%")
-                
-                # Lump Sum Chart
-                fig = go.Figure()
-                fig.add_trace(go.Scatter(x=lump_sum_data.index, y=lump_sum_data['Portfolio_Value'],
-                                       name='มูลค่าพอร์ต', line=dict(color='#84fab0', width=3)))
-                fig.add_trace(go.Scatter(x=lump_sum_data.index, y=[lump_sum_amount] * len(lump_sum_data),
-                                       name='เงินลงทุน', line=dict(color='#8fd3f4', width=2)))
-                fig.update_layout(title="Lump Sum Investment Progress", height=500)
-                st.plotly_chart(fig, use_container_width=True)
-    
-    # Educational Content
-    with st.expander("📚 คู่มือการใช้งาน"):
-        st.markdown("""
-        ### 🎯 DCA vs Lump Sum คืออะไร?
-        
-        **Dollar Cost Averaging (DCA)**: การลงทุนเป็นงวดๆ เป็นจำนวนเงินคงที่ในช่วงเวลาที่กำหนด
-        - ✅ ลดความเสี่ยงจากการเข้าจังหวะผิด
-        - ✅ เหมาะกับนักลงทุนมือใหม่
-        - ❌ อาจพลาดโอกาสเมื่อตลาดขาขึ้น
-        
-        **Lump Sum**: การลงทุนเงินก้อนครั้งเดียว
-        - ✅ ได้ผลตอบแทนสูงกว่าในตลาดขาขึ้น
-        - ✅ ได้รับผลจากการทบต้นเร็วกว่า
-        - ❌ ความเสี่ยงสูงหากเข้าจังหวะผิด
-        
-        ### 📊 วิธีอ่านผลการวิเคราะห์
-        - **Total Return**: ผลตอบแทนรวมตลอดช่วงเวลา
-        - **Annualized Return**: ผลตอบแทนเฉลี่ยต่อปี
-        - **Volatility**: ความผันผวนของการลงทุน
-        - **Sharpe Ratio**: อัตราส่วนผลตอบแทนต่อความเสี่ยง
-        - **Max Drawdown**: การลดลงสูงสุดจากจุดสูงสุด
-        """)
-
-if __name__ == "__main__":
-    main()
+                # DCA Metrics
+                dca_metrics = calculate_metrics(dca_data['Portfolio_Value
