@@ -564,9 +564,9 @@ def main():
                 fig.update_layout(title="DCA Investment Progress", height=500)
                 st.plotly_chart(fig, use_container_width=True)
                 
-                # DCA Metrics
+                  # DCA Metrics
                 dca_metrics = calculate_metrics(dca_data['Portfolio_Value
-# DCA Metrics
+                # DCA Metrics
                 dca_metrics = calculate_metrics(dca_data['Portfolio_Value'])
                 
                 st.markdown("### 📊 เมตริกการวิเคราะห์ DCA")
