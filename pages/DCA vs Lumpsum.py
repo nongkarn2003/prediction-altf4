@@ -566,3 +566,221 @@ def main():
                 
                 # DCA Metrics
                 dca_metrics = calculate_metrics(dca_data['Portfolio_Value
+# DCA Metrics
+                dca_metrics = calculate_metrics(dca_data['Portfolio_Value'])
+                
+                st.markdown("### 📊 เมตริกการวิเคราะห์ DCA")
+                metrics_data = {
+                    'เมตริก': ['ผลตอบแทนรวม (%)', 'ผลตอบแทนต่อปี (%)', 'ความผันผวน (%)', 
+                              'Sharpe Ratio', 'Max Drawdown (%)'],
+                    'ค่า': [
+                        f"{dca_metrics.get('total_return', 0):.2f}%",
+                        f"{dca_metrics.get('annualized_return', 0):.2f}%",
+                        f"{dca_metrics.get('volatility', 0):.2f}%",
+                        f"{dca_metrics.get('sharpe_ratio', 0):.2f}",
+                        f"{dca_metrics.get('max_drawdown', 0):.2f}%"
+                    ]
+                }
+                st.dataframe(pd.DataFrame(metrics_data), use_container_width=True)
+                
+                if show_detailed_table:
+                    st.markdown("### 📋 ตารางรายละเอียด DCA")
+                    st.dataframe(dca_data, use_container_width=True)
+                
+            elif analysis_type == "Lump Sum เท่านั้น" and not lump_sum_data.empty:
+                # Lump Sum Only Analysis
+                st.markdown("## 📈 การวิเคราะห์ Lump Sum")
+                
+                ls_final_value = lump_sum_data['Portfolio_Value'].iloc[-1]
+                ls_total_invested = lump_sum_amount
+                ls_return = ((ls_final_value - ls_total_invested) / ls_total_invested) * 100 if ls_total_invested > 0 else 0
+                
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("มูลค่าพอร์ต", f"฿{ls_final_value:,.2f}")
+                with col2:
+                    st.metric("เงินลงทุน", f"฿{ls_total_invested:,.2f}")
+                with col3:
+                    st.metric("ผลตอบแทน", f"{ls_return:+.2f}%")
+                
+                # Lump Sum Chart
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(x=lump_sum_data.index, y=lump_sum_data['Portfolio_Value'],
+                                       name='มูลค่าพอร์ต', line=dict(color='#764ba2', width=3)))
+                fig.add_trace(go.Scatter(x=lump_sum_data.index, 
+                                       y=[lump_sum_amount] * len(lump_sum_data),
+                                       name='เงินลงทุน', line=dict(color='#667eea', width=2, dash='dash')))
+                fig.update_layout(title="Lump Sum Investment Progress", height=500)
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Lump Sum Metrics
+                ls_metrics = calculate_metrics(lump_sum_data['Portfolio_Value'])
+                
+                st.markdown("### 📊 เมตริกการวิเคราะห์ Lump Sum")
+                metrics_data = {
+                    'เมตริก': ['ผลตอบแทนรวม (%)', 'ผลตอบแทนต่อปี (%)', 'ความผันผวน (%)', 
+                              'Sharpe Ratio', 'Max Drawdown (%)'],
+                    'ค่า': [
+                        f"{ls_metrics.get('total_return', 0):.2f}%",
+                        f"{ls_metrics.get('annualized_return', 0):.2f}%",
+                        f"{ls_metrics.get('volatility', 0):.2f}%",
+                        f"{ls_metrics.get('sharpe_ratio', 0):.2f}",
+                        f"{ls_metrics.get('max_drawdown', 0):.2f}%"
+                    ]
+                }
+                st.dataframe(pd.DataFrame(metrics_data), use_container_width=True)
+                
+                if show_detailed_table:
+                    st.markdown("### 📋 ตารางรายละเอียด Lump Sum")
+                    st.dataframe(lump_sum_data, use_container_width=True)
+                
+            elif analysis_type == "Monte Carlo":
+                # Monte Carlo Analysis
+                st.markdown("## 🎲 การวิเคราะห์ Monte Carlo")
+                
+                with st.spinner("กำลังทำการจำลอง..."):
+                    win_rate, simulation_results = calculate_win_rate(
+                        stock_data, monthly_amount, lump_sum_amount, 
+                        duration_months, monte_carlo_sims
+                    )
+                
+                if simulation_results:
+                    # Win Rate Summary
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown(f"""
+                        <div class="metric-card">
+                            <h3>🏆 อัตราชนะของ DCA</h3>
+                            <h2 style="color: #667eea;">{win_rate:.1f}%</h2>
+                            <p>จาก {len(simulation_results)} การจำลอง</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    with col2:
+                        ls_win_rate = 100 - win_rate
+                        st.markdown(f"""
+                        <div class="metric-card">
+                            <h3>🏆 อัตราชนะของ Lump Sum</h3>
+                            <h2 style="color: #764ba2;">{ls_win_rate:.1f}%</h2>
+                            <p>จาก {len(simulation_results)} การจำลอง</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    # Simulation Results Chart
+                    results_df = pd.DataFrame(simulation_results)
+                    
+                    fig = make_subplots(
+                        rows=1, cols=2,
+                        subplot_titles=('Distribution of Returns', 'DCA vs Lump Sum Scatter'),
+                    )
+                    
+                    # Histogram of returns
+                    fig.add_trace(
+                        go.Histogram(x=results_df['dca_return'], name='DCA Returns', 
+                                   opacity=0.7, nbinsx=20, marker_color='#667eea'),
+                        row=1, col=1
+                    )
+                    fig.add_trace(
+                        go.Histogram(x=results_df['ls_return'], name='Lump Sum Returns', 
+                                   opacity=0.7, nbinsx=20, marker_color='#764ba2'),
+                        row=1, col=1
+                    )
+                    
+                    # Scatter plot
+                    colors = ['#84fab0' if x else '#fcb69f' for x in results_df['dca_wins']]
+                    fig.add_trace(
+                        go.Scatter(x=results_df['ls_return'], y=results_df['dca_return'],
+                                 mode='markers', name='Simulations',
+                                 marker=dict(color=colors, size=8, opacity=0.6)),
+                        row=1, col=2
+                    )
+                    
+                    # Add diagonal line (equal returns)
+                    min_return = min(results_df['dca_return'].min(), results_df['ls_return'].min())
+                    max_return = max(results_df['dca_return'].max(), results_df['ls_return'].max())
+                    fig.add_trace(
+                        go.Scatter(x=[min_return, max_return], y=[min_return, max_return],
+                                 mode='lines', name='Equal Returns', 
+                                 line=dict(dash='dash', color='red')),
+                        row=1, col=2
+                    )
+                    
+                    fig.update_layout(height=500, title_text="Monte Carlo Simulation Results")
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Summary Statistics
+                    st.markdown("### 📊 สถิติสรุป")
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        dca_avg = results_df['dca_return'].mean()
+                        dca_std = results_df['dca_return'].std()
+                        st.markdown(f"""
+                        **DCA Statistics:**
+                        - เฉลี่ย: {dca_avg:.2f}%
+                        - ส่วนเบี่ยงเบนมาตรฐาน: {dca_std:.2f}%
+                        - สูงสุด: {results_df['dca_return'].max():.2f}%
+                        - ต่ำสุด: {results_df['dca_return'].min():.2f}%
+                        """)
+                    
+                    with col2:
+                        ls_avg = results_df['ls_return'].mean()
+                        ls_std = results_df['ls_return'].std()
+                        st.markdown(f"""
+                        **Lump Sum Statistics:**
+                        - เฉลี่ย: {ls_avg:.2f}%
+                        - ส่วนเบี่ยงเบนมาตรฐาน: {ls_std:.2f}%
+                        - สูงสุด: {results_df['ls_return'].max():.2f}%
+                        - ต่ำสุด: {results_df['ls_return'].min():.2f}%
+                        """)
+                
+                else:
+                    st.error("ไม่สามารถทำการจำลอง Monte Carlo ได้")
+    
+    # Additional Analysis Section
+    st.markdown("---")
+    st.markdown("## 📝 การวิเคราะห์เพิ่มเติม")
+    
+    with st.expander("📚 คำแนะนำการใช้งาน"):
+        st.markdown("""
+        ### วิธีใช้เครื่องมือนี้:
+        
+        1. **เลือกหุ้น**: เลือกหมวดหุ้นและหุ้นที่ต้องการวิเคราะห์
+        2. **ตั้งค่าการลงทุน**: กำหนดจำนวนเงิน DCA และ Lump Sum
+        3. **เลือกช่วงเวลา**: กำหนดระยะเวลาการลงทุน
+        4. **เลือกประเภทการวิเคราะห์**: 
+           - **เปรียบเทียบ**: เปรียบเทียบ DCA vs Lump Sum
+           - **DCA เท่านั้น**: วิเคราะห์กลยุทธ์ DCA
+           - **Lump Sum เท่านั้น**: วิเคราะห์กลยุทธ์ Lump Sum
+           - **Monte Carlo**: จำลองหลายครั้งเพื่อหาอัตราชนะ
+        
+        ### การตีความผลลัพธ์:
+        - **Total Return**: ผลตอบแทนรวมตลอดระยะเวลา
+        - **Annualized Return**: ผลตอบแทนเฉลี่ยต่อปี
+        - **Volatility**: ความผันผวนของการลงทุน
+        - **Sharpe Ratio**: อัตราส่วนผลตอบแทนต่อความเสี่ยง
+        - **Max Drawdown**: การสูญเสียสูงสุดจากจุดสูงสุด
+        """)
+    
+    with st.expander("⚠️ ข้อควรระวัง"):
+        st.markdown("""
+        ### ข้อจำกัดและข้อควรระวัง:
+        
+        - การวิเคราะห์นี้ใช้ข้อมูลในอดีต ซึ่งไม่รับประกันผลตอบแทนในอนาคต
+        - ไม่รวมค่าธรรมเนียมการซื้อขาย ภาษี และค่าใช้จ่ายอื่นๆ
+        - ผลลัพธ์อาจแตกต่างจากการลงทุนจริงเนื่องจากปัจจัยภายนอก
+        - ควรปรึกษาที่ปรึกษาการลงทุนก่อนตัดสินใจลงทุน
+        - การลงทุนมีความเสี่ยง อาจได้รับเงินลงทุนคืนไม่เต็มจำนวน
+        """)
+    
+    # Footer
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align: center; color: #666; padding: 2rem;">
+        <p>🚀 Advanced DCA vs Lump Sum Investment Analyzer</p>
+        <p>เครื่องมือวิเคราะห์การลงทุนขั้นสูง | พัฒนาด้วย Streamlit และ Python</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()
