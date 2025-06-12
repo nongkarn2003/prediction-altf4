@@ -16,7 +16,7 @@ DEFAULT_TICKER = "AAPL"
 @st.cache_data
 def get_stock_data(ticker, start_date):
     data = yf.download(ticker, start=start_date)
-    data = data[["Adj Close"]].rename(columns={"Adj Close": "Price"})
+    data = data[["Close"]].rename(columns={"Close": "Price"})
     return data
 
 def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
