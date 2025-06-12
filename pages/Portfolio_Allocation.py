@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 # 📌 ฟังก์ชันคำนวณผลตอบแทนพอร์ต
 # ========================
 def download_data(tickers, start, end):
-    data = yf.download(tickers, start=start, end=end)["Adj Close"]
+    data = yf.download(tickers, start=start, end=end)["Close"]
     return data.dropna()
 
 def calculate_portfolio(data, weights):
