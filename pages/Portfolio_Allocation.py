@@ -75,7 +75,7 @@ st.subheader("📊 สถิติของพอร์ต")
 st.write(pd.DataFrame(performance, index=["Portfolio"]).T)
 
 # --- เทียบกับ SPY ---
-spy = yf.download("SPY", start=start_date, end=end_date)["Adj Close"]
+spy = yf.download("SPY", start=start_date, end=end_date)["Close"]
 spy = spy / spy.iloc[0]
 comparison = pd.DataFrame({"Portfolio": portfolio / portfolio.iloc[0], "SPY": spy})
 st.subheader("📉 เปรียบเทียบกับดัชนี S&P 500")
