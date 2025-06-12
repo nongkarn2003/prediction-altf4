@@ -53,7 +53,12 @@ def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
             break
             
         actual_date = available_dates[0]
-        price = stock_data.loc[actual_date, 'Price']
+        
+        # ✅ แก้ตรงนี้: ใช้ .at แทน .loc
+        try:
+            price = stock_data.at[actual_date, 'Price']
+        except Exception:
+            continue
         
         if price <= 0 or pd.isna(price):
             continue
