@@ -75,8 +75,13 @@ st.subheader("📊 สถิติของพอร์ต")
 st.write(pd.DataFrame(performance, index=["Portfolio"]).T)
 
 # --- เทียบกับ SPY ---
-spy = yf.download("SPY", start=start_date, end=end_date)["Close"]
-spy = spy / spy.iloc[0]
-comparison = pd.DataFrame({"Portfolio": portfolio / portfolio.iloc[0], "SPY": spy})
+spy = yf.download("SPY", start=start_date, end=end_date)["Adj Close"]
+spy = spy.reindex(portfolio.index).dropna()
+portfolio = portfolio.reindex(spy.index)
+
+comparison = pd.DataFrame({
+    "Portfolio": portfolio / portfolio.iloc[0],
+    "SPY": spy / spy.iloc[0]
+})
 st.subheader("📉 เปรียบเทียบกับดัชนี S&P 500")
 st.line_chart(comparison)
