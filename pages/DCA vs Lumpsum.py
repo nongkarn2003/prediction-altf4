@@ -31,9 +31,15 @@ def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
         if len(available_dates) == 0:
             continue
         actual_date = available_dates[0]
-        price = stock_data.at[actual_date, "Price"]
+
+        try:
+            price = stock_data.loc[actual_date, "Price"]
+        except KeyError:
+            continue  # skip if the date is still not found
+
         if pd.isna(price) or price <= 0:
             continue
+
         shares_bought = monthly_amount / price
         total_invested += monthly_amount
         total_shares += shares_bought
@@ -47,6 +53,7 @@ def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
         })
 
     return pd.DataFrame(results)
+
 
 def simulate_lump_sum(stock_data, lump_sum_amount, start_date):
     start_date = pd.to_datetime(start_date)
