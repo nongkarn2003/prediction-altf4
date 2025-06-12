@@ -50,17 +50,19 @@ def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
         available_dates = stock_data.index[stock_data.index >= investment_date]
         
         if len(available_dates) == 0:
-            break
-            
+            continue  # ข้ามเดือนที่ไม่มีข้อมูล
+        
         actual_date = available_dates[0]
         
-        # ✅ แก้ตรงนี้: ใช้ .at แทน .loc
         try:
             price = stock_data.at[actual_date, 'Price']
         except Exception:
-            continue
+            continue  # ข้ามถ้าดึงราคาไม่ได้
         
-        if price <= 0 or pd.isna(price):
+        if isinstance(price, (pd.Series, np.ndarray)):
+            price = price.iloc[0]
+        
+        if pd.isna(price) or price <= 0:
             continue
         
         shares_bought = monthly_amount / price
@@ -73,10 +75,11 @@ def simulate_dca(stock_data, monthly_amount, duration_months, start_date):
             'Price': price,
             'Total_Invested': total_invested,
             'Portfolio_Value': current_value,
-            'Return_Pct': ((current_value - total_invested) / total_invested) * 100 if total_invested > 0 else 0
+            'Return_Pct': ((current_value - total_invested) / total_invested) * 100
         })
     
     return pd.DataFrame(results)
+
 
 def simulate_lump_sum(stock_data, lump_sum_amount, start_date):
     start_date = pd.to_datetime(start_date)
@@ -87,21 +90,21 @@ def simulate_lump_sum(stock_data, lump_sum_amount, start_date):
     
     actual_start_date = available_dates[0]
     
-    # ✅ แก้ตรงนี้
     try:
-        initial_price = stock_data.at[actual_start_date, 'Price']
+        price = stock_data.at[actual_start_date, 'Price']
     except Exception:
         return pd.DataFrame()
     
-    if initial_price <= 0 or pd.isna(initial_price):
+    if pd.isna(price) or price <= 0:
         return pd.DataFrame()
     
-    shares = lump_sum_amount / initial_price
+    shares = lump_sum_amount / price
     portfolio_data = stock_data.loc[actual_start_date:].copy()
     portfolio_data['Portfolio_Value'] = shares * portfolio_data['Price']
     portfolio_data['Return_Pct'] = ((portfolio_data['Portfolio_Value'] - lump_sum_amount) / lump_sum_amount) * 100
     
     return portfolio_data
+
 
 # Main App
 def main():
