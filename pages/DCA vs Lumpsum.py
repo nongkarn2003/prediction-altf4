@@ -86,7 +86,12 @@ def simulate_lump_sum(stock_data, lump_sum_amount, start_date):
         return pd.DataFrame()
     
     actual_start_date = available_dates[0]
-    initial_price = stock_data.loc[actual_start_date, 'Price']
+    
+    # ✅ แก้ตรงนี้
+    try:
+        initial_price = stock_data.at[actual_start_date, 'Price']
+    except Exception:
+        return pd.DataFrame()
     
     if initial_price <= 0 or pd.isna(initial_price):
         return pd.DataFrame()
